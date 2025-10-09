@@ -70,19 +70,38 @@ const JoinWithInvitation = ({
     validateOnChange: false,
     validateOnBlur: false,
     onSubmit: async (values) => {
+      let token = recaptchaToken;
+      if (recaptchaSiteKey) {
+        try {
+          const exec = (recaptchaRef.current as any)?.executeAsync;
+          if (exec) {
+            token = (await exec.call(recaptchaRef.current)) as string;
+            setRecaptchaToken(token);
+          } else {
+            (recaptchaRef.current as any)?.execute?.();
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            token = recaptchaToken;
+          }
+        } catch (err) {
+          console.error('reCAPTCHA execution failed', err);
+          toast.error(t('recaptcha-failed') || 'reCAPTCHA verification failed');
+          return;
+        }
+      }
+
       const response = await fetch('/api/auth/join', {
         method: 'POST',
         headers: defaultHeaders,
         body: JSON.stringify({
           ...values,
-          recaptchaToken,
+          recaptchaToken: token,
           inviteToken,
         }),
       });
 
       const json = (await response.json()) as ApiResponse;
 
-      recaptchaRef.current?.reset();
+      (recaptchaRef.current as any)?.reset?.();
 
       if (!response.ok) {
         toast.error(json.error.message);

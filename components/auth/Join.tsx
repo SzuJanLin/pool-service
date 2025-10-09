@@ -50,12 +50,35 @@ const Join = ({ recaptchaSiteKey }: JoinProps) => {
     validateOnChange: false,
     validateOnBlur: false,
     onSubmit: async (values) => {
+      // If using invisible reCAPTCHA, execute it programmatically to get a token
+      let token = recaptchaToken;
+      if (recaptchaSiteKey) {
+        try {
+          // executeAsync is provided by the widget instance; cast to any to be safe with typings
+          const exec = (recaptchaRef.current as any)?.executeAsync;
+          if (exec) {
+            token = (await exec.call(recaptchaRef.current)) as string;
+            setRecaptchaToken(token);
+          } else {
+            // Fallback: try execute() which doesn't return a promise
+            (recaptchaRef.current as any)?.execute?.();
+            // Wait for onChange to set the token (short timeout) - best effort fallback
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            token = recaptchaToken;
+          }
+        } catch (err) {
+          console.error('reCAPTCHA execution failed', err);
+          toast.error(t('recaptcha-failed') || 'reCAPTCHA verification failed');
+          return;
+        }
+      }
+
       const response = await fetch('/api/auth/join', {
         method: 'POST',
         headers: defaultHeaders,
         body: JSON.stringify({
           ...values,
-          recaptchaToken,
+          recaptchaToken: token,
         }),
       });
 
@@ -63,7 +86,8 @@ const Join = ({ recaptchaSiteKey }: JoinProps) => {
         confirmEmail: boolean;
       }>;
 
-      recaptchaRef.current?.reset();
+      // Reset the widget so it can be used again
+      (recaptchaRef.current as any)?.reset?.();
 
       if (!response.ok) {
         toast.error(json.error.message);

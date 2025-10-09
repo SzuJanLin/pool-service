@@ -82,17 +82,36 @@ const Login: NextPageWithLayout<
 
       setMessage({ text: null, status: null });
 
+      let token = recaptchaToken;
+      if (recaptchaSiteKey) {
+        try {
+          const exec = (recaptchaRef.current as any)?.executeAsync;
+          if (exec) {
+            token = (await exec.call(recaptchaRef.current)) as string;
+            setRecaptchaToken(token);
+          } else {
+            (recaptchaRef.current as any)?.execute?.();
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            token = recaptchaToken;
+          }
+        } catch (err) {
+          console.error('reCAPTCHA execution failed', err);
+          setMessage({ text: 'recaptcha-failed', status: 'error' });
+          return;
+        }
+      }
+
       const response = await signIn('credentials', {
         email,
         password,
         csrfToken,
         redirect: false,
         callbackUrl: redirectUrl,
-        recaptchaToken,
+        recaptchaToken: token,
       });
 
-      formik.resetForm();
-      recaptchaRef.current?.reset();
+  formik.resetForm();
+  (recaptchaRef.current as any)?.reset?.();
 
       if (response && !response.ok) {
         setMessage({ text: response.error, status: 'error' });
