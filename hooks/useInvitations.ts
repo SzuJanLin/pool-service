@@ -2,7 +2,7 @@ import useSWR, { mutate } from 'swr';
 
 import fetcher from '@/lib/fetcher';
 import type { ApiResponse } from 'types';
-import { TeamInvitation } from 'models/invitation';
+import { CompanyInvitation } from 'models/invitation';
 
 interface Props {
   slug: string;
@@ -10,9 +10,9 @@ interface Props {
 }
 
 const useInvitations = ({ slug, sentViaEmail }: Props) => {
-  const url = `/api/teams/${slug}/invitations?sentViaEmail=${sentViaEmail}`;
+  const url = `/api/companies/${slug}/invitations?sentViaEmail=${sentViaEmail}`;
 
-  const { data, error, isLoading } = useSWR<ApiResponse<TeamInvitation[]>>(
+  const { data, error, isLoading } = useSWR<ApiResponse<CompanyInvitation[]>>(
     url,
     fetcher
   );

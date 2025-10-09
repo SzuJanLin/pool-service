@@ -4,7 +4,7 @@ import useSWR, { mutate } from 'swr';
 import type { ApiResponse } from 'types';
 
 const useWebhook = (slug: string, endpointId: string | null) => {
-  const url = `/api/teams/${slug}/webhooks/${endpointId}`;
+  const url = `/api/companies/${slug}/webhooks/${endpointId}`;
 
   const { data, error, isLoading } = useSWR<ApiResponse<EndpointOut>>(
     slug ? url : null,

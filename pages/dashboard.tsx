@@ -1,5 +1,5 @@
 import { Loading } from '@/components/shared';
-import useTeams from 'hooks/useTeams';
+import useCompanies from 'hooks/useCompanies';
 import { GetServerSidePropsContext } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
@@ -8,19 +8,19 @@ import type { NextPageWithLayout } from 'types';
 
 const Dashboard: NextPageWithLayout = () => {
   const router = useRouter();
-  const { teams, isLoading } = useTeams();
+  const { companies, isLoading } = useCompanies();
 
   useEffect(() => {
-    if (isLoading || !teams) {
+    if (isLoading || !companies) {
       return;
     }
 
-    if (teams.length > 0) {
-      router.push(`/teams/${teams[0].slug}/settings`);
+    if (companies.length > 0) {
+      router.push(`/companies/${companies[0].slug}/settings`);
     } else {
-      router.push('teams?newTeam=true');
+      router.push('companies?newCompany=true');
     }
-  }, [isLoading, router, teams]);
+  }, [isLoading, router, companies]);
 
   return <Loading />;
 };

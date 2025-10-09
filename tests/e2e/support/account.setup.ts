@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import { team, user } from '../support/helper';
+import { company, user } from '../support/helper';
 import { JoinPage, LoginPage } from './fixtures';
 
 type LoginFixture = {
@@ -9,7 +9,7 @@ type LoginFixture = {
 
 const setup = base.extend<LoginFixture>({
   joinPage: async ({ page }, use) => {
-    const joinPage = new JoinPage(page, user, team.name);
+    const joinPage = new JoinPage(page, user, company.name);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(joinPage);

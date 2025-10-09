@@ -14,7 +14,7 @@ export class LoginPage {
   private readonly ssoEmailBox: Locator;
   private readonly slugInput: Locator;
   private readonly welcomeBackHeading: Locator;
-  private readonly multipleTeamErrorText: Locator;
+  private readonly multipleCompanyErrorText: Locator;
   private readonly createNewAccountButton: Locator;
   private readonly yourNameInput: Locator;
   private readonly yourEmailInput: Locator;
@@ -23,7 +23,7 @@ export class LoginPage {
   private readonly successfullyCreatedText: Locator;
   private readonly logInUsingExistingButton: Locator;
   private readonly idpSignInButton: Locator;
-  private readonly joinTeamButton: Locator;
+  private readonly joinCompanyButton: Locator;
   private readonly mockSAMLLoginHeading: Locator;
   private readonly pageHeading: Locator;
 
@@ -45,7 +45,7 @@ export class LoginPage {
     this.welcomeBackHeading = this.page.getByText('Welcome back', {
       exact: true,
     });
-    this.multipleTeamErrorText = this.page.getByText(
+    this.multipleCompanyErrorText = this.page.getByText(
       'User belongs to multiple'
     );
     this.createNewAccountButton = this.page.getByRole('button', {
@@ -66,8 +66,8 @@ export class LoginPage {
     this.idpSignInButton = this.page.getByRole('button', {
       name: 'Sign In',
     });
-    this.joinTeamButton = this.page.getByRole('button', {
-      name: 'Join the Team',
+    this.joinCompanyButton = this.page.getByRole('button', {
+      name: 'Join the Company',
     });
     this.mockSAMLLoginHeading = this.page.getByRole('heading', {
       name: 'SAML SSO Login',
@@ -82,12 +82,12 @@ export class LoginPage {
     await this.page.waitForURL('/auth/login');
   }
 
-  async isMultipleTeamErrorVisible() {
-    await expect(this.multipleTeamErrorText).toBeVisible();
+  async isMultipleCompanyErrorVisible() {
+    await expect(this.multipleCompanyErrorText).toBeVisible();
   }
 
-  async loggedInCheck(teamSlug: string) {
-    await this.page.waitForURL(`/teams/${teamSlug}/${loggedInPath}`);
+  async loggedInCheck(companySlug: string) {
+    await this.page.waitForURL(`/companies/${companySlug}/${loggedInPath}`);
     await expect(this.pageHeading).toBeVisible();
   }
 
@@ -112,8 +112,8 @@ export class LoginPage {
     }
   }
 
-  async ssoLoginWithSlug(teamSlug: string) {
-    await this.slugInput.fill(teamSlug);
+  async ssoLoginWithSlug(companySlug: string) {
+    await this.slugInput.fill(companySlug);
     await this.continueWithSSOButton.click();
     await expect(this.mockSAMLLoginHeading).toBeVisible();
     await this.signInButton.click();
@@ -156,7 +156,7 @@ export class LoginPage {
   }
 
   public async acceptInvitation() {
-    await this.joinTeamButton.click();
+    await this.joinCompanyButton.click();
     await expect(this.pageHeading).toBeVisible();
   }
 

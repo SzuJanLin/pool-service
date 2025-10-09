@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import { user, team, secondTeam } from '../support/helper';
+import { user, company, secondCompany } from '../support/helper';
 import { LoginPage, SSOPage, SettingsPage } from '../support/fixtures';
 
 const SSO_METADATA_URL = [
@@ -9,8 +9,8 @@ const SSO_METADATA_URL = [
 
 type SSOLoginFixture = {
   loginPage: LoginPage;
-  ssoPageTeam: SSOPage;
-  ssoPageSecondTeam: SSOPage;
+  ssoPageCompany: SSOPage;
+  ssoPageSecondCompany: SSOPage;
   settingsPage: SettingsPage;
 };
 
@@ -20,13 +20,13 @@ const test = base.extend<SSOLoginFixture>({
     // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(loginPage);
   },
-  ssoPageTeam: async ({ page }, use) => {
-    const ssoPage = new SSOPage(page, team.slug);
+  ssoPageCompany: async ({ page }, use) => {
+    const ssoPage = new SSOPage(page, company.slug);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(ssoPage);
   },
-  ssoPageSecondTeam: async ({ page }, use) => {
-    const ssoPage = new SSOPage(page, secondTeam.slug);
+  ssoPageSecondCompany: async ({ page }, use) => {
+    const ssoPage = new SSOPage(page, secondCompany.slug);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(ssoPage);
   },
@@ -37,13 +37,13 @@ const test = base.extend<SSOLoginFixture>({
   },
 });
 
-test('Create SSO connection for team', async ({
+test('Create SSO connection for company', async ({
   loginPage,
-  ssoPageTeam: ssoPage,
+  ssoPageCompany: ssoPage,
 }) => {
   await loginPage.goto();
   await loginPage.credentialLogin(user.email, user.password);
-  await loginPage.loggedInCheck(team.slug);
+  await loginPage.loggedInCheck(company.slug);
   await ssoPage.goto();
   await ssoPage.createSSOConnection({ metadataUrl: SSO_METADATA_URL[0] });
 });
@@ -51,17 +51,17 @@ test('Create SSO connection for team', async ({
 test('Login with SSO', async ({ loginPage }) => {
   await loginPage.goto();
   await loginPage.ssoLogin(user.email);
-  await loginPage.loggedInCheck(team.slug);
+  await loginPage.loggedInCheck(company.slug);
 });
 
-test('Create a new team', async ({ settingsPage, loginPage }) => {
+test('Create a new company', async ({ settingsPage, loginPage }) => {
   await loginPage.goto();
   await loginPage.credentialLogin(user.email, user.password);
-  await loginPage.loggedInCheck(team.slug);
-  await settingsPage.createNewTeam(secondTeam.name);
+  await loginPage.loggedInCheck(company.slug);
+  await settingsPage.createNewCompany(secondCompany.name);
 });
 
-test('SSO login with 2 teams & one SSO connection', async ({
+test('SSO login with 2 companies & one SSO connection', async ({
   loginPage,
   settingsPage,
 }) => {
@@ -70,9 +70,9 @@ test('SSO login with 2 teams & one SSO connection', async ({
   await settingsPage.isLoggedIn();
 });
 
-test('Create SSO connection for new team', async ({
+test('Create SSO connection for new company', async ({
   loginPage,
-  ssoPageSecondTeam: ssoPage,
+  ssoPageSecondCompany: ssoPage,
   settingsPage,
 }) => {
   await loginPage.goto();
@@ -83,16 +83,16 @@ test('Create SSO connection for new team', async ({
   await ssoPage.createSSOConnection({ metadataUrl: SSO_METADATA_URL[1] });
 });
 
-test('SSO login with 2 teams & two SSO connection', async ({
+test('SSO login with 2 companies & two SSO connection', async ({
   loginPage,
-  ssoPageSecondTeam: ssoPage,
+  ssoPageSecondCompany: ssoPage,
 }) => {
   await loginPage.goto();
   await loginPage.ssoLogin(user.email, true);
 
-  await loginPage.isMultipleTeamErrorVisible();
+  await loginPage.isMultipleCompanyErrorVisible();
 
-  await loginPage.ssoLoginWithSlug(team.slug);
+  await loginPage.ssoLoginWithSlug(company.slug);
   await ssoPage.goto();
 
   await ssoPage.openEditSSOConnectionView();
@@ -102,7 +102,7 @@ test('SSO login with 2 teams & two SSO connection', async ({
 
 test('Delete SSO connection', async ({
   loginPage,
-  ssoPageTeam: ssoPage,
+  ssoPageCompany: ssoPage,
   settingsPage,
 }) => {
   await loginPage.goto();
@@ -115,10 +115,10 @@ test('Delete SSO connection', async ({
   await ssoPage.checkEmptyConnectionList();
 });
 
-test('Remove second team', async ({ loginPage, settingsPage }) => {
+test('Remove second company', async ({ loginPage, settingsPage }) => {
   await loginPage.goto();
   await loginPage.credentialLogin(user.email, user.password);
   await settingsPage.isLoggedIn();
 
-  await settingsPage.removeTeam(secondTeam.slug);
+  await settingsPage.removeCompany(secondCompany.slug);
 });

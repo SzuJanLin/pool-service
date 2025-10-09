@@ -1,8 +1,8 @@
 import env from '@/lib/env';
 import { ssoManager } from '@/lib/jackson/sso';
 import { ssoVerifySchema, validateWithSchema } from '@/lib/zod';
-import { Team } from '@prisma/client';
-import { getTeam, getTeams } from 'models/team';
+import { Company } from '@prisma/client';
+import { getCompany, getCompanies } from 'models/company';
 import { getUser } from 'models/user';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -42,31 +42,31 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(400).json({ error: 'Invalid request.' });
   }
 
-  // If slug is provided, verify SSO connections for the team
+  // If slug is provided, verify SSO connections for the company
   if (slug) {
-    const team = await getTeam({ slug });
+    const company = await getCompany({ slug });
 
-    if (!team) {
-      throw new Error('Team not found.');
+    if (!company) {
+      throw new Error('Company not found.');
     }
 
-    const data = await handleTeamSSOVerification(team.id);
+    const data = await handleCompanySSOVerification(company.id);
     return res.json({ data });
   }
 
   // If email is provided, verify SSO connections for the user
   if (email) {
-    const teams = await getTeamsFromEmail(email);
+    const companies = await getCompaniesFromEmail(email);
 
-    if (teams.length === 1) {
-      const data = await handleTeamSSOVerification(teams[0].id);
+    if (companies.length === 1) {
+      const data = await handleCompanySSOVerification(companies[0].id);
       return res.json({ data });
     }
 
-    const { teamId, useSlug } = await processTeamsForSSOVerification(teams);
+    const { companyId, useSlug } = await processCompaniesForSSOVerification(companies);
 
-    // Multiple teams with SSO connections found
-    // Ask user to provide team slug
+    // Multiple companies with SSO connections found
+    // Ask user to provide company slug
     if (useSlug) {
       return res.json({
         data: {
@@ -75,14 +75,14 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    // No teams with SSO connections found
-    if (!teamId) {
-      throw new Error('No SSO connections found for any team.');
+    // No companies with SSO connections found
+    if (!companyId) {
+      throw new Error('No SSO connections found for any company.');
     } else {
-      // Only one team with SSO connections found
+      // Only one company with SSO connections found
       return res.json({
         data: {
-          teamId,
+          companyId,
         },
       });
     }
@@ -90,39 +90,39 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 /**
- * Handle SSO verification for given team id
+ * Handle SSO verification for given company id
  */
-async function handleTeamSSOVerification(teamId: string) {
-  const exists = await teamSSOExists(teamId);
+async function handleCompanySSOVerification(companyId: string) {
+  const exists = await companySSOExists(companyId);
 
   if (!exists) {
-    throw new Error('No SSO connections found for this team.');
+    throw new Error('No SSO connections found for this company.');
   }
 
-  return { teamId };
+  return { companyId };
 }
 
 /**
- * Get list of teams for a user from email
+ * Get list of companies for a user from email
  */
-async function getTeamsFromEmail(email: string): Promise<Team[]> {
+async function getCompaniesFromEmail(email: string): Promise<Company[]> {
   const user = await getUser({ email });
   if (!user) {
     throw new Error('User not found.');
   }
-  const teams = await getTeams(user.id);
-  if (!teams.length) {
-    throw new Error('User does not belong to any team.');
+  const companies = await getCompanies(user.id);
+  if (!companies.length) {
+    throw new Error('User does not belong to any company.');
   }
-  return teams;
+  return companies;
 }
 
 /**
- * Check if SSO connections exist for a team
+ * Check if SSO connections exist for a company
  */
-async function teamSSOExists(teamId: string): Promise<boolean> {
+async function companySSOExists(companyId: string): Promise<boolean> {
   const connections = await sso.getConnections({
-    tenant: teamId,
+    tenant: companyId,
     product: env.jackson.productId,
   });
 
@@ -134,34 +134,34 @@ async function teamSSOExists(teamId: string): Promise<boolean> {
 }
 
 /**
- * Process teams to find the team with SSO connections
- * If multiple teams with SSO connections are found, return useSlug as true
- * If no teams with SSO connections are found, return teamId as empty string
- * If only one team with SSO connections is found, return teamId
+ * Process companies to find the company with SSO connections
+ * If multiple companies with SSO connections are found, return useSlug as true
+ * If no companies with SSO connections are found, return companyId as empty string
+ * If only one company with SSO connections is found, return companyId
  */
-async function processTeamsForSSOVerification(teams: Team[]): Promise<{
-  teamId: string;
+async function processCompaniesForSSOVerification(companies: Company[]): Promise<{
+  companyId: string;
   useSlug: boolean;
 }> {
-  let teamId = '';
-  for (const team of teams) {
-    const exists = await teamSSOExists(team.id);
+  let companyId = '';
+  for (const company of companies) {
+    const exists = await companySSOExists(company.id);
 
     if (exists) {
-      if (teamId) {
-        // Multiple teams with SSO connections found
+      if (companyId) {
+        // Multiple companies with SSO connections found
         return {
-          teamId: '',
+          companyId: '',
           useSlug: true,
         };
       } else {
-        // First team with SSO connections found
-        teamId = team.id;
+        // First company with SSO connections found
+        companyId = company.id;
       }
     }
   }
   return {
-    teamId,
+    companyId,
     useSlug: false,
   };
 }

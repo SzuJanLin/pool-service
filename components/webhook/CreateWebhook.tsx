@@ -1,4 +1,4 @@
-import type { Team } from '@prisma/client';
+import type { Company } from '@prisma/client';
 import type { FormikHelpers } from 'formik';
 import useWebhooks from 'hooks/useWebhooks';
 import { useTranslation } from 'next-i18next';
@@ -13,26 +13,26 @@ import { defaultHeaders } from '@/lib/common';
 const CreateWebhook = ({
   visible,
   setVisible,
-  team,
+  company,
 }: {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  team: Team;
+  company: Company;
 }) => {
-  const { mutateWebhooks } = useWebhooks(team.slug);
+  const { mutateWebhooks } = useWebhooks(company.slug);
   const { t } = useTranslation('common');
 
   const onSubmit = async (
     values: WebhookFormSchema,
     formikHelpers: FormikHelpers<WebhookFormSchema>
   ) => {
-    const response = await fetch(`/api/teams/${team.slug}/webhooks`, {
+    const response = await fetch(`/api/companies/${company.slug}/webhooks`, {
       method: 'POST',
       headers: defaultHeaders,
       body: JSON.stringify(values),
     });
 
-    const json = (await response.json()) as ApiResponse<Team>;
+    const json = (await response.json()) as ApiResponse<Company>;
 
     if (!response.ok) {
       toast.error(json.error.message);

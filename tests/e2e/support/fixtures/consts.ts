@@ -1,3 +1,3 @@
-export const pageHeading = 'Team Settings';
+export const pageHeading = 'Company Settings';
 export const loggedInPath = 'settings';
 export const testRole = 'MEMBER';

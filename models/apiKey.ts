@@ -3,7 +3,7 @@ import { createHash, randomBytes } from 'crypto';
 
 interface CreateApiKeyParams {
   name: string;
-  teamId: string;
+  companyId: string;
 }
 
 const hashApiKey = (apiKey: string) => {
@@ -17,7 +17,7 @@ const generateUniqueApiKey = () => {
 };
 
 export const createApiKey = async (params: CreateApiKeyParams) => {
-  const { name, teamId } = params;
+  const { name, companyId } = params;
 
   const [hashedKey, apiKey] = generateUniqueApiKey();
 
@@ -25,17 +25,17 @@ export const createApiKey = async (params: CreateApiKeyParams) => {
     data: {
       name,
       hashedKey: hashedKey,
-      team: { connect: { id: teamId } },
+      company: { connect: { id: companyId } },
     },
   });
 
   return apiKey;
 };
 
-export const fetchApiKeys = async (teamId: string) => {
+export const fetchApiKeys = async (companyId: string) => {
   return prisma.apiKey.findMany({
     where: {
-      teamId,
+      companyId,
     },
     select: {
       id: true,
@@ -60,7 +60,7 @@ export const getApiKey = async (apiKey: string) => {
     },
     select: {
       id: true,
-      teamId: true,
+      companyId: true,
     },
   });
 };
@@ -72,7 +72,7 @@ export const getApiKeyById = async (id: string) => {
     },
     select: {
       id: true,
-      teamId: true,
+      companyId: true,
     },
   });
 };

@@ -39,7 +39,7 @@ const SSO: NextPageWithLayout<
           }
         : {
             slug: Yup.string()
-              .required('Team slug is required')
+              .required('Company slug is required')
               .max(maxLengthPolicies.slug),
           }
     ),
@@ -58,11 +58,11 @@ const SSO: NextPageWithLayout<
       if (data.useSlug) {
         formik.resetForm();
         setUseEmail(false);
-        toast.error(t('multiple-sso-teams'));
+        toast.error(t('multiple-sso-companies'));
         return;
       }
       await signIn('boxyhq-saml', undefined, {
-        tenant: data.teamId,
+        tenant: data.companyId,
         product: jacksonProductId,
       });
     },
@@ -97,11 +97,11 @@ const SSO: NextPageWithLayout<
             ) : (
               <InputWithLabel
                 type="text"
-                label="Team slug"
+                label="Company slug"
                 name="slug"
                 placeholder="boxyhq"
                 value={formik.values.slug}
-                descriptionText="Contact your administrator to get your team slug"
+                descriptionText="Contact your administrator to get your company slug"
                 error={formik.touched.slug ? formik.errors.slug : undefined}
                 onChange={formik.handleChange}
               />

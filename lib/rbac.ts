@@ -1,18 +1,18 @@
 import { Role } from '@prisma/client';
 import { ApiError } from './errors';
-import { getTeamMember } from 'models/team';
+import { getCompanyMember } from 'models/company';
 
 export async function validateMembershipOperation(
   memberId: string,
-  teamMember,
+  companyMember,
   operationMeta?: {
     role?: Role;
   }
 ) {
-  const updatingMember = await getTeamMember(memberId, teamMember.team.slug);
+  const updatingMember = await getCompanyMember(memberId, companyMember.company.slug);
   // Member and Admin can't update the role of Owner
   if (
-    (teamMember.role === Role.MEMBER || teamMember.role === Role.ADMIN) &&
+    (companyMember.role === Role.MEMBER || companyMember.role === Role.ADMIN) &&
     updatingMember.role === Role.OWNER
   ) {
     throw new ApiError(
@@ -22,7 +22,7 @@ export async function validateMembershipOperation(
   }
   // Member can't update the role of Admin & Owner
   if (
-    teamMember.role === Role.MEMBER &&
+    companyMember.role === Role.MEMBER &&
     (updatingMember.role === Role.ADMIN || updatingMember.role === Role.OWNER)
   ) {
     throw new ApiError(
@@ -32,7 +32,7 @@ export async function validateMembershipOperation(
   }
 
   // Admin can't make anyone an Owner
-  if (teamMember.role === Role.ADMIN && operationMeta?.role === Role.OWNER) {
+  if (companyMember.role === Role.ADMIN && operationMeta?.role === Role.OWNER) {
     throw new ApiError(
       403,
       'You do not have permission to update the role of this member to Owner.'
@@ -41,7 +41,7 @@ export async function validateMembershipOperation(
 
   // Member can't make anyone an Admin or Owner
   if (
-    teamMember.role === Role.MEMBER &&
+    companyMember.role === Role.MEMBER &&
     (operationMeta?.role === Role.ADMIN || operationMeta?.role === Role.OWNER)
   ) {
     throw new ApiError(

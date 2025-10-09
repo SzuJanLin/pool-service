@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import { user, team } from '../support/helper';
+import { user, company } from '../support/helper';
 import { LoginPage, SSOPage } from '../support/fixtures';
 
 const SSO_METADATA_URL = `${process.env.MOCKSAML_ORIGIN}/api/saml/metadata`;
@@ -17,7 +17,7 @@ const test = base.extend<IdpInitiatedFixture>({
   },
 
   ssoPage: async ({ page }, use) => {
-    const ssoPage = new SSOPage(page, team.slug);
+    const ssoPage = new SSOPage(page, company.slug);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(ssoPage);
   },
@@ -26,7 +26,7 @@ const test = base.extend<IdpInitiatedFixture>({
 test.beforeEach(async ({ loginPage }) => {
   await loginPage.goto();
   await loginPage.credentialLogin(user.email, user.password);
-  await loginPage.loggedInCheck(team.slug);
+  await loginPage.loggedInCheck(company.slug);
 });
 
 test('IdP initiated SSO', async ({ ssoPage, loginPage }) => {
@@ -35,7 +35,7 @@ test('IdP initiated SSO', async ({ ssoPage, loginPage }) => {
 
   await loginPage.logout(user.name);
   await loginPage.idpInitiatedLogin();
-  await loginPage.loggedInCheck(team.slug);
+  await loginPage.loggedInCheck(company.slug);
 
   await ssoPage.goto();
   await ssoPage.openEditSSOConnectionView();

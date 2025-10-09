@@ -16,7 +16,7 @@ export type ApiResponse<T = unknown> =
       error: ApiError;
     };
 
-export type TeamWithMemberCount = Prisma.TeamGetPayload<{
+export type CompanyWithMemberCount = Prisma.CompanyGetPayload<{
   include: {
     _count: {
       select: { members: true };
@@ -44,10 +44,10 @@ export type AppEvent =
   | 'user.updated'
   | 'user.signup'
   | 'user.password.reset'
-  | 'team.fetched'
-  | 'team.created'
-  | 'team.updated'
-  | 'team.removed'
+  | 'company.fetched'
+  | 'company.created'
+  | 'company.updated'
+  | 'company.removed'
   | 'apikey.created'
   | 'apikey.removed'
   | 'apikey.fetched'
@@ -65,12 +65,12 @@ export type AUTH_PROVIDER =
   | 'credentials'
   | 'idp-initiated';
 
-export interface TeamFeature {
+export interface CompanyFeature {
   sso: boolean;
   dsync: boolean;
   auditLog: boolean;
   webhook: boolean;
   apiKey: boolean;
   payments: boolean;
-  deleteTeam: boolean;
+  deleteCompany: boolean;
 }

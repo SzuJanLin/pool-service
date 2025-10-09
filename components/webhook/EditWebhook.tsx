@@ -1,5 +1,5 @@
 import { Error, Loading } from '@/components/shared';
-import type { Team } from '@prisma/client';
+import type { Company } from '@prisma/client';
 import type { FormikHelpers } from 'formik';
 import useWebhook from 'hooks/useWebhook';
 import useWebhooks from 'hooks/useWebhooks';
@@ -16,17 +16,17 @@ import { defaultHeaders } from '@/lib/common';
 const EditWebhook = ({
   visible,
   setVisible,
-  team,
+  company,
   endpoint,
 }: {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  team: Team;
+  company: Company;
   endpoint: EndpointOut;
 }) => {
-  const { isLoading, isError, webhook } = useWebhook(team.slug, endpoint.id);
+  const { isLoading, isError, webhook } = useWebhook(company.slug, endpoint.id);
   const { t } = useTranslation('common');
-  const { mutateWebhooks } = useWebhooks(team.slug);
+  const { mutateWebhooks } = useWebhooks(company.slug);
 
   if (isLoading || !webhook) {
     return <Loading />;
@@ -41,7 +41,7 @@ const EditWebhook = ({
     formikHelpers: FormikHelpers<WebhookFormSchema>
   ) => {
     const response = await fetch(
-      `/api/teams/${team.slug}/webhooks/${endpoint.id}`,
+      `/api/companies/${company.slug}/webhooks/${endpoint.id}`,
       {
         method: 'PUT',
         headers: defaultHeaders,

@@ -17,7 +17,7 @@ import { randomUUID } from 'crypto';
 
 import { Role } from '@prisma/client';
 import { getAccount } from 'models/account';
-import { addTeamMember, getTeam } from 'models/team';
+import { addCompanyMember, getCompany } from 'models/company';
 import { createUser, getUser } from 'models/user';
 import { verifyPassword } from '@/lib/auth';
 import { isEmailAllowed } from '@/lib/email/utils';
@@ -319,11 +319,11 @@ export const getAuthOptions = (
           await linkAccount(newUser, account);
 
           if (isIdpLogin && user) {
-            await linkToTeam(user as unknown as Profile, newUser.id);
+            await linkToCompany(user as unknown as Profile, newUser.id);
           }
 
           if (account.provider === 'boxyhq-saml' && profile) {
-            await linkToTeam(profile, newUser.id);
+            await linkToCompany(profile, newUser.id);
           }
 
           if (isCredentialsProviderCallbackWithDbSession) {
@@ -428,14 +428,14 @@ const linkAccount = async (user: User, account: Account) => {
   }
 };
 
-const linkToTeam = async (profile: Profile, userId: string) => {
-  const team = await getTeam({
+const linkToCompany = async (profile: Profile, userId: string) => {
+  const company = await getCompany({
     id: profile.requested.tenant,
   });
 
   // Sort out roles
   const roles = profile.roles || profile.groups || [];
-  let userRole: Role = team.defaultRole || Role.MEMBER;
+  let userRole: Role = company.defaultRole || Role.MEMBER;
 
   for (let role of roles) {
     if (env.groupPrefix) {
@@ -457,5 +457,5 @@ const linkToTeam = async (profile: Profile, userId: string) => {
     }
   }
 
-  await addTeamMember(team.id, userId, userRole);
+  await addCompanyMember(company.id, userId, userRole);
 };

@@ -12,11 +12,11 @@ import env from '@/lib/env';
 
 interface WelcomeEmailProps {
   name: string;
-  team: string;
+  company: string;
   subject: string;
 }
 
-const WelcomeEmail = ({ name, subject, team }: WelcomeEmailProps) => {
+const WelcomeEmail = ({ name, subject, company }: WelcomeEmailProps) => {
   return (
     <Html>
       <Head />
@@ -24,8 +24,8 @@ const WelcomeEmail = ({ name, subject, team }: WelcomeEmailProps) => {
       <EmailLayout>
         <Text>Hi {name},</Text>
         <Text>
-          You have been successfully signed up to {app.name} on team{' '}
-          <b>{team}</b>.
+          You have been successfully signed up to {app.name} on company{' '}
+          <b>{company}</b>.
         </Text>
         <Text>Click the link below to login now:</Text>
         <Container className="text-center">

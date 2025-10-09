@@ -1,14 +1,14 @@
 import { Error, Loading } from '@/components/shared';
-import { TeamTab } from '@/components/team';
-import useTeam from 'hooks/useTeam';
+import { CompanyTab } from '@/components/company';
+import useCompany from 'hooks/useCompany';
 import { useTranslation } from 'next-i18next';
 import APIKeys from './APIKeys';
-import { TeamFeature } from 'types';
+import { CompanyFeature } from 'types';
 
-const APIKeysContainer = ({ teamFeatures }: { teamFeatures: TeamFeature }) => {
+const APIKeysContainer = ({ companyFeatures }: { companyFeatures: CompanyFeature }) => {
   const { t } = useTranslation('common');
 
-  const { isLoading, isError, team } = useTeam();
+  const { isLoading, isError, company } = useCompany();
 
   if (isLoading) {
     return <Loading />;
@@ -18,14 +18,14 @@ const APIKeysContainer = ({ teamFeatures }: { teamFeatures: TeamFeature }) => {
     return <Error message={isError.message} />;
   }
 
-  if (!team) {
-    return <Error message={t('team-not-found')} />;
+  if (!company) {
+    return <Error message={t('company-not-found')} />;
   }
 
   return (
     <>
-      <TeamTab activeTab="api-keys" team={team} teamFeatures={teamFeatures} />
-      <APIKeys team={team} />
+      <CompanyTab activeTab="api-keys" company={company} companyFeatures={companyFeatures} />
+      <APIKeys company={company} />
     </>
   );
 };

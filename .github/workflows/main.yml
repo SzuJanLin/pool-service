@@ -24,13 +24,13 @@ jobs:
       NEXTAUTH_SECRET: secret
       NEXTAUTH_SESSION_STRATEGY: database
       AUTH_PROVIDERS: github,credentials,saml,idp-initiated
-      FEATURE_TEAM_SSO: true
-      FEATURE_TEAM_DSYNC: true
-      FEATURE_TEAM_AUDIT_LOG: true
-      FEATURE_TEAM_WEBHOOK: false
-      FEATURE_TEAM_API_KEY: true
-      FEATURE_TEAM_DELETION: true
-      FEATURE_TEAM_PAYMENTS: true
+      FEATURE_COMPANY_SSO: true
+      FEATURE_COMPANY_DSYNC: true
+      FEATURE_COMPANY_AUDIT_LOG: true
+      FEATURE_COMPANY_WEBHOOK: false
+      FEATURE_COMPANY_API_KEY: true
+      FEATURE_COMPANY_DELETION: true
+      FEATURE_COMPANY_PAYMENTS: true
       CONFIRM_EMAIL: false
       HIDE_LANDING_PAGE: false
       GROUP_PREFIX: boxyhq-

@@ -63,13 +63,13 @@ model User {
   invalid_login_attempts Int       @default(0)
   lockedAt               DateTime?
 
-  teamMembers TeamMember[]
+  companyMembers CompanyMember[]
   accounts    Account[]
   sessions    Session[]
   invitations Invitation[]
 }
 
-model Team {
+model Company {
   id              String       @id @default(uuid())
   name            String
   slug            String       @unique
@@ -79,31 +79,31 @@ model Team {
   billingProvider String?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @default(now())
-  members         TeamMember[]
+  members         CompanyMember[]
   invitations     Invitation[]
   apiKeys         ApiKey[]
 
   @@index([billingId])
 }
 
-model TeamMember {
+model CompanyMember {
   id        String   @id @default(uuid())
-  teamId    String
+  companyId    String
   userId    String
   role      Role     @default(MEMBER)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([teamId, userId])
+  @@unique([companyId, userId])
   @@index([userId])
 }
 
 model Invitation {
   id             String   @id @default(uuid())
-  teamId         String
+  companyId         String
   email          String?
   role           Role     @default(MEMBER)
   token          String   @unique
@@ -115,9 +115,9 @@ model Invitation {
   allowedDomains String[] @default([])
 
   user User @relation(fields: [invitedBy], references: [id], onDelete: Cascade)
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  @@unique([teamId, email])
+  @@unique([companyId, email])
   @@index([email])
 }
 
@@ -133,16 +133,16 @@ model PasswordReset {
 model ApiKey {
   id         String    @id @default(uuid())
   name       String
-  teamId     String
+  companyId     String
   hashedKey  String    @unique
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @default(now())
   expiresAt  DateTime?
   lastUsedAt DateTime?
 
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  @@index([teamId])
+  @@index([companyId])
 }
 
 model Subscription {

@@ -4,14 +4,14 @@ import { sendVerificationEmail } from '@/lib/email/sendVerificationEmail';
 import { isEmailAllowed } from '@/lib/email/utils';
 import env from '@/lib/env';
 import { ApiError } from '@/lib/errors';
-import { createTeam, getTeam, isTeamExists } from 'models/team';
+import { createCompany, getCompany, isCompanyExists } from 'models/company';
 import { createUser, getUser } from 'models/user';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { recordMetric } from '@/lib/metrics';
 import { getInvitation, isInvitationExpired } from 'models/invitation';
 import { validateRecaptcha } from '@/lib/recaptcha';
 import { slackNotify } from '@/lib/slack';
-import { Team } from '@prisma/client';
+import { Company } from '@prisma/client';
 import { createVerificationToken } from 'models/verificationToken';
 import { userJoinSchema, validateWithSchema } from '@/lib/zod';
 
@@ -45,7 +45,7 @@ export default async function handler(
 
 // Signup the user
 const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { name, password, team, inviteToken, recaptchaToken } = req.body;
+  const { name, password, company, inviteToken, recaptchaToken } = req.body;
 
   await validateRecaptcha(recaptchaToken);
 
@@ -75,7 +75,7 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!isEmailAllowed(email)) {
     throw new ApiError(
       400,
-      `We currently only accept work email addresses for sign-up. Please use your work email to create an account. If you don't have a work email, feel free to contact our support team for assistance.`
+      `We currently only accept work email addresses for sign-up. Please use your work email to create an account. If you don't have a work email, feel free to contact our support company for assistance.`
     );
   }
 
@@ -83,20 +83,20 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
     throw new ApiError(400, 'An user with this email already exists.');
   }
 
-  // Check if team name is available
+  // Check if company name is available
   if (!invitation) {
-    if (!team) {
-      throw new ApiError(400, 'A team name is required.');
+    if (!company) {
+      throw new ApiError(400, 'A company name is required.');
     }
 
-    const slug = slugify(team);
+    const slug = slugify(company);
 
-    validateWithSchema(userJoinSchema, { team, slug });
+    validateWithSchema(userJoinSchema, { company, slug });
 
-    const slugCollisions = await isTeamExists(slug);
+    const slugCollisions = await isCompanyExists(slug);
 
     if (slugCollisions > 0) {
-      throw new ApiError(400, 'A team with this slug already exists.');
+      throw new ApiError(400, 'A company with this slug already exists.');
     }
   }
 
@@ -107,18 +107,18 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
     emailVerified: invitation ? new Date() : null,
   });
 
-  let userTeam: Team | null = null;
+  let userCompany: Company | null = null;
 
-  // Create team if user is not invited
-  // So we can create the team with the user as the owner
+  // Create company if user is not invited
+  // So we can create the company with the user as the owner
   if (!invitation) {
-    userTeam = await createTeam({
+    userCompany = await createCompany({
       userId: user.id,
-      name: team,
-      slug: slugify(team),
+      name: company,
+      slug: slugify(company),
     });
   } else {
-    userTeam = await getTeam({ slug: invitation.team.slug });
+    userCompany = await getCompany({ slug: invitation.company.slug });
   }
 
   // Send account verification email
@@ -140,7 +140,7 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
     fields: {
       Name: user.name,
       Email: user.email,
-      Team: userTeam?.name,
+      Company: userCompany?.name,
     },
   });
 

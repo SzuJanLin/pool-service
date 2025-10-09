@@ -1,6 +1,6 @@
 import { WithLoadingAndError } from '@/components/shared';
 import { EmptyState } from '@/components/shared';
-import { Team } from '@prisma/client';
+import { Company } from '@prisma/client';
 import useWebhooks from 'hooks/useWebhooks';
 import { useTranslation } from 'next-i18next';
 import React, { useState } from 'react';
@@ -14,7 +14,7 @@ import type { ApiResponse } from 'types';
 import ConfirmationDialog from '../shared/ConfirmationDialog';
 import { Table } from '@/components/shared/table/Table';
 
-const Webhooks = ({ team }: { team: Team }) => {
+const Webhooks = ({ company }: { company: Company }) => {
   const { t } = useTranslation('common');
   const [createWebhookVisible, setCreateWebhookVisible] = useState(false);
   const [updateWebhookVisible, setUpdateWebhookVisible] = useState(false);
@@ -28,7 +28,7 @@ const Webhooks = ({ team }: { team: Team }) => {
   );
 
   const { isLoading, isError, webhooks, mutateWebhooks } = useWebhooks(
-    team.slug
+    company.slug
   );
 
   const deleteWebhook = async (webhook: EndpointOut | null) => {
@@ -39,7 +39,7 @@ const Webhooks = ({ team }: { team: Team }) => {
     const sp = new URLSearchParams({ webhookId: webhook.id });
 
     const response = await fetch(
-      `/api/teams/${team.slug}/webhooks?${sp.toString()}`,
+      `/api/companies/${company.slug}/webhooks?${sp.toString()}`,
       {
         method: 'DELETE',
         headers: defaultHeaders,
@@ -134,7 +134,7 @@ const Webhooks = ({ team }: { team: Team }) => {
           <EditWebhook
             visible={updateWebhookVisible}
             setVisible={setUpdateWebhookVisible}
-            team={team}
+            company={company}
             endpoint={endpoint}
           />
         )}
@@ -150,7 +150,7 @@ const Webhooks = ({ team }: { team: Team }) => {
       <CreateWebhook
         visible={createWebhookVisible}
         setVisible={setCreateWebhookVisible}
-        team={team}
+        company={company}
       />
     </WithLoadingAndError>
   );

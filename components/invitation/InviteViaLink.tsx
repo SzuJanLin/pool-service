@@ -9,20 +9,20 @@ import { useTranslation } from 'next-i18next';
 import type { ApiResponse } from 'types';
 import useInvitations from 'hooks/useInvitations';
 import { availableRoles } from '@/lib/permissions';
-import type { Team } from '@prisma/client';
+import type { Company } from '@prisma/client';
 import { defaultHeaders, isValidDomain, maxLengthPolicies } from '@/lib/common';
 import { InputWithCopyButton } from '../shared';
 import ConfirmationDialog from '../shared/ConfirmationDialog';
 
 interface InviteViaLinkProps {
-  team: Team;
+  company: Company;
 }
 
-const InviteViaLink = ({ team }: InviteViaLinkProps) => {
+const InviteViaLink = ({ company }: InviteViaLinkProps) => {
   const [showDelDialog, setShowDelDialog] = useState(false);
   const { t } = useTranslation('common');
   const { invitations } = useInvitations({
-    slug: team.slug,
+    slug: company.slug,
     sentViaEmail: false,
   });
 
@@ -55,7 +55,7 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
     },
     validationSchema: FormValidationSchema,
     onSubmit: async (values) => {
-      const response = await fetch(`/api/teams/${team.slug}/invitations`, {
+      const response = await fetch(`/api/companies/${company.slug}/invitations`, {
         method: 'POST',
         headers: defaultHeaders,
         body: JSON.stringify(values),
@@ -67,7 +67,7 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
         return;
       }
 
-      mutate(`/api/teams/${team.slug}/invitations?sentViaEmail=false`);
+      mutate(`/api/companies/${company.slug}/invitations?sentViaEmail=false`);
       toast.success(t('invitation-link-created'));
       formik.resetForm();
     },
@@ -76,7 +76,7 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
   // Delete an existing invitation link
   const deleteInvitationLink = async (id: string) => {
     const response = await fetch(
-      `/api/teams/${team.slug}/invitations?id=${id}`,
+      `/api/companies/${company.slug}/invitations?id=${id}`,
       {
         method: 'DELETE',
         headers: defaultHeaders,
@@ -89,7 +89,7 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
       return;
     }
 
-    mutate(`/api/teams/${team.slug}/invitations?sentViaEmail=false`);
+    mutate(`/api/companies/${company.slug}/invitations?sentViaEmail=false`);
     toast.success(t('invitation-link-deleted'));
     setShowDelDialog(false);
   };
@@ -106,8 +106,8 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
         />
         <p className="text-sm text-slate-500 my-2">
           {invitation.allowedDomains.length > 0
-            ? `Anyone with an email address ending with ${invitation.allowedDomains} can use this link to join your team.`
-            : 'Anyone can use this link to join your team.'}
+            ? `Anyone with an email address ending with ${invitation.allowedDomains} can use this link to join your company.`
+            : 'Anyone can use this link to join your company.'}
           <Button
             className="btn btn-xs btn-link link-error"
             onClick={() => setShowDelDialog(true)}
@@ -163,8 +163,8 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
       </div>
       <p className="text-sm text-slate-500 my-2">
         {formik.values.domains && !formik.errors.domains
-          ? `Anyone with an email address ending with ${formik.values.domains} can use this link to join your team.`
-          : 'Anyone can use this link to join your team.'}
+          ? `Anyone with an email address ending with ${formik.values.domains} can use this link to join your company.`
+          : 'Anyone can use this link to join your company.'}
       </p>
     </form>
   );

@@ -1,18 +1,18 @@
 import Stripe from 'stripe';
 import env from '@/lib/env';
-import { updateTeam } from 'models/team';
+import { updateCompany } from 'models/company';
 
 export const stripe = new Stripe(env.stripe.secretKey ?? '');
 
-export async function getStripeCustomerId(teamMember, session?: any) {
+export async function getStripeCustomerId(companyMember, session?: any) {
   let customerId = '';
-  if (!teamMember.team.billingId) {
+  if (!companyMember.company.billingId) {
     const customerData: {
-      metadata: { teamId: string };
+      metadata: { companyId: string };
       email?: string;
     } = {
       metadata: {
-        teamId: teamMember.teamId,
+        companyId: companyMember.companyId,
       },
     };
     if (session?.user?.email) {
@@ -22,13 +22,13 @@ export async function getStripeCustomerId(teamMember, session?: any) {
       ...customerData,
       name: session?.user?.name as string,
     });
-    await updateTeam(teamMember.team.slug, {
+    await updateCompany(companyMember.company.slug, {
       billingId: customer.id,
       billingProvider: 'stripe',
     });
     customerId = customer.id;
   } else {
-    customerId = teamMember.team.billingId;
+    customerId = companyMember.company.billingId;
   }
   return customerId;
 }

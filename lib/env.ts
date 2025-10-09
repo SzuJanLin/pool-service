@@ -92,19 +92,19 @@ const env = {
 
   darkModeEnabled: process.env.NEXT_PUBLIC_DARK_MODE !== 'false',
 
-  teamFeatures: {
-    sso: process.env.FEATURE_TEAM_SSO !== 'false',
-    dsync: process.env.FEATURE_TEAM_DSYNC !== 'false',
-    webhook: process.env.FEATURE_TEAM_WEBHOOK !== 'false',
-    apiKey: process.env.FEATURE_TEAM_API_KEY !== 'false',
-    auditLog: process.env.FEATURE_TEAM_AUDIT_LOG !== 'false',
+  companyFeatures: {
+    sso: process.env.FEATURE_COMPANY_SSO !== 'false',
+    dsync: process.env.FEATURE_COMPANY_DSYNC !== 'false',
+    webhook: process.env.FEATURE_COMPANY_WEBHOOK !== 'false',
+    apiKey: process.env.FEATURE_COMPANY_API_KEY !== 'false',
+    auditLog: process.env.FEATURE_COMPANY_AUDIT_LOG !== 'false',
     payments:
-      process.env.FEATURE_TEAM_PAYMENTS === 'false'
+      process.env.FEATURE_COMPANY_PAYMENTS === 'false'
         ? false
         : Boolean(
             process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET
           ),
-    deleteTeam: process.env.FEATURE_TEAM_DELETION !== 'false',
+    deleteCompany: process.env.FEATURE_COMPANY_DELETION !== 'false',
   },
 
   recaptcha: {

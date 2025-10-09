@@ -43,7 +43,7 @@ Next.js-based SaaS starter kit saves you months of development by starting you o
 - [SAML Jackson](https://github.com/boxyhq/jackson) (Provides SAML SSO, Directory Sync)
   This is a service for handling SAML SSO (Single Sign-On). It's used to allow users to sign in with a single ID and password to any of several related systems i.e (using a single set of credentials). The implementation of SAML Jackson is primarily located within the files associated with authentication.
 - [Svix](https://www.svix.com/) (Provides Webhook Orchestration)
-  This is a service for handling webhooks. It's used to emit events on user/team CRUD operations, which can then be caught and handled by other parts of the application or external services. The integration of Svix is distributed throughout the codebase, primarily in areas where Create, Read, Update, and Delete (CRUD) operations are executed.
+  This is a service for handling webhooks. It's used to emit events on user/company CRUD operations, which can then be caught and handled by other parts of the application or external services. The integration of Svix is distributed throughout the codebase, primarily in areas where Create, Read, Update, and Delete (CRUD) operations are executed.
 - [Retraced](https://github.com/retracedhq/retraced) (Provides Audit Logs Service)
   This is a service for audit logging and data visibility. It helps track user activities within the application i.e (who did what and when in the application). The usage of Retraced would be dispersed throughout the codebase, likely in the files where important actions are performed.
 - [Stripe](https://stripe.com) (Provides Payments)
@@ -210,11 +210,11 @@ The default login options are email and GitHub. Configure below:
 - Sign in with GitHub [[Creating a Github OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)]
 - Directory Sync (SCIM)
 - Update account
-- Create team
-- Delete team
-- Invite users to the team
-- Manage team members
-- Update team settings
+- Create company
+- Delete company
+- Invite users to the company
+- Manage company members
+- Update company settings
 - Webhooks & Events
 - Internationalization
 - Audit logs
@@ -253,7 +253,7 @@ Please try to create bug reports that are:
 
 ## 🤩 Community
 
-- [Discord](https://discord.gg/uyb7pYt4Pa) (For live discussion with the Open-Source Community and BoxyHQ team)
+- [Discord](https://discord.gg/uyb7pYt4Pa) (For live discussion with the Open-Source Community and BoxyHQ company)
 - [Twitter](https://twitter.com/BoxyHQ) / [LinkedIn](https://www.linkedin.com/company/boxyhq) (Follow us)
 - [Youtube](https://www.youtube.com/@boxyhq) (Watch community events and tutorials)
 - [GitHub Issues](https://github.com/boxyhq/saas-starter-kit/issues) (Contributions, report issues, and product ideas)

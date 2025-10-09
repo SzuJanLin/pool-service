@@ -7,18 +7,18 @@ import type { ApiResponse } from 'types';
 
 const usePermissions = () => {
   const router = useRouter();
-  const [teamSlug, setTeamSlug] = useState<string | null>(null);
+  const [companySlug, setCompanySlug] = useState<string | null>(null);
 
   const { slug } = router.query as { slug: string };
 
   useEffect(() => {
     if (slug) {
-      setTeamSlug(slug);
+      setCompanySlug(slug);
     }
   }, [router.query, slug]);
 
   const { data, error, isLoading } = useSWR<ApiResponse<Permission[]>>(
-    teamSlug ? `/api/teams/${teamSlug}/permissions` : null,
+    companySlug ? `/api/companies/${companySlug}/permissions` : null,
     fetcher
   );
 

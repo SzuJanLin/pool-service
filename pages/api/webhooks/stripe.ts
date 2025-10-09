@@ -9,7 +9,7 @@ import {
   getBySubscriptionId,
   updateStripeSubscription,
 } from 'models/subscription';
-import { getByCustomerId } from 'models/team';
+import { getByCustomerId } from 'models/company';
 
 export const config = {
   api: {
@@ -90,8 +90,8 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
 
   const subscription = await getBySubscriptionId(id);
   if (!subscription) {
-    const teamExists = await getByCustomerId(customer as string);
-    if (!teamExists) {
+    const companyExists = await getByCustomerId(customer as string);
+    if (!companyExists) {
       return;
     } else {
       await handleSubscriptionCreated(event);

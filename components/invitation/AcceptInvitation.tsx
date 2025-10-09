@@ -5,10 +5,10 @@ import { useTranslation } from 'next-i18next';
 
 import type { ApiResponse } from 'types';
 import { defaultHeaders } from '@/lib/common';
-import { Invitation, Team } from '@prisma/client';
+import { Invitation, Company } from '@prisma/client';
 
 interface AcceptInvitationProps {
-  invitation: Invitation & { team: Team };
+  invitation: Invitation & { company: Company };
 }
 
 const AcceptInvitation = ({ invitation }: AcceptInvitationProps) => {
@@ -17,7 +17,7 @@ const AcceptInvitation = ({ invitation }: AcceptInvitationProps) => {
 
   const acceptInvitation = async () => {
     const response = await fetch(
-      `/api/teams/${invitation.team.slug}/invitations`,
+      `/api/companies/${invitation.company.slug}/invitations`,
       {
         method: 'PUT',
         headers: defaultHeaders,

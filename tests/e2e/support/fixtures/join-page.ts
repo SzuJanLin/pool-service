@@ -2,7 +2,7 @@ import { type Page, type Locator, expect } from '@playwright/test';
 
 export class JoinPage {
   private readonly nameBox: Locator;
-  private readonly teamNameBox: Locator;
+  private readonly companyNameBox: Locator;
   private readonly emailBox: Locator;
   private readonly passwordBox: Locator;
   private readonly createAccountButton: Locator;
@@ -14,10 +14,10 @@ export class JoinPage {
       email: string;
       password: string;
     },
-    public readonly teamName: string
+    public readonly companyName: string
   ) {
     this.nameBox = this.page.getByPlaceholder('Your Name');
-    this.teamNameBox = this.page.getByPlaceholder('Team Name');
+    this.companyNameBox = this.page.getByPlaceholder('Company Name');
     this.emailBox = this.page.getByPlaceholder('example@boxyhq.com');
     this.passwordBox = this.page.getByPlaceholder('Password');
     this.createAccountButton = page.getByRole('button', {
@@ -36,7 +36,7 @@ export class JoinPage {
 
   async signUp() {
     await this.nameBox.fill(this.user.name);
-    await this.teamNameBox.fill(this.teamName);
+    await this.companyNameBox.fill(this.companyName);
     await this.emailBox.fill(this.user.email);
     await this.passwordBox.fill(this.user.password);
     await this.createAccountButton.click();

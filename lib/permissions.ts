@@ -3,15 +3,15 @@ import { Role } from '@prisma/client';
 type RoleType = (typeof Role)[keyof typeof Role];
 export type Action = 'create' | 'update' | 'read' | 'delete' | 'leave';
 export type Resource =
-  | 'team'
-  | 'team_member'
-  | 'team_invitation'
-  | 'team_sso'
-  | 'team_dsync'
-  | 'team_audit_log'
-  | 'team_webhook'
-  | 'team_payments'
-  | 'team_api_key';
+  | 'company'
+  | 'company_member'
+  | 'company_invitation'
+  | 'company_sso'
+  | 'company_dsync'
+  | 'company_audit_log'
+  | 'company_webhook'
+  | 'company_payments'
+  | 'company_api_key';
 
 type RolePermissions = {
   [role in RoleType]: Permission[];
@@ -40,79 +40,79 @@ export const availableRoles = [
 export const permissions: RolePermissions = {
   OWNER: [
     {
-      resource: 'team',
+      resource: 'company',
       actions: '*',
     },
     {
-      resource: 'team_member',
+      resource: 'company_member',
       actions: '*',
     },
     {
-      resource: 'team_invitation',
+      resource: 'company_invitation',
       actions: '*',
     },
     {
-      resource: 'team_sso',
+      resource: 'company_sso',
       actions: '*',
     },
     {
-      resource: 'team_dsync',
+      resource: 'company_dsync',
       actions: '*',
     },
     {
-      resource: 'team_audit_log',
+      resource: 'company_audit_log',
       actions: '*',
     },
     {
-      resource: 'team_payments',
+      resource: 'company_payments',
       actions: '*',
     },
     {
-      resource: 'team_webhook',
+      resource: 'company_webhook',
       actions: '*',
     },
     {
-      resource: 'team_api_key',
+      resource: 'company_api_key',
       actions: '*',
     },
   ],
   ADMIN: [
     {
-      resource: 'team',
+      resource: 'company',
       actions: '*',
     },
     {
-      resource: 'team_member',
+      resource: 'company_member',
       actions: '*',
     },
     {
-      resource: 'team_invitation',
+      resource: 'company_invitation',
       actions: '*',
     },
     {
-      resource: 'team_sso',
+      resource: 'company_sso',
       actions: '*',
     },
     {
-      resource: 'team_dsync',
+      resource: 'company_dsync',
       actions: '*',
     },
     {
-      resource: 'team_audit_log',
+      resource: 'company_audit_log',
       actions: '*',
     },
     {
-      resource: 'team_webhook',
+      resource: 'company_webhook',
       actions: '*',
     },
     {
-      resource: 'team_api_key',
+      resource: 'company_api_key',
       actions: '*',
     },
   ],
   MEMBER: [
     {
-      resource: 'team',
+      resource: 'company',
       actions: ['read', 'leave'],
     },
   ],

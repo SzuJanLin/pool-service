@@ -2,34 +2,34 @@ import type { Page, Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 export class SettingsPage {
-  private readonly newTeamMenu: Locator;
-  private readonly newTeamNameInput: Locator;
-  private readonly createTeamDialogButton: Locator;
-  private readonly removeTeamButton: Locator;
-  private readonly removeTeamConfirmPrompt: Locator;
-  private readonly updateTeamSuccessMessage: string;
-  private readonly createTeamSuccessMessage: string;
-  private readonly removeTeamSuccessMessage: string;
+  private readonly newCompanyMenu: Locator;
+  private readonly newCompanyNameInput: Locator;
+  private readonly createCompanyDialogButton: Locator;
+  private readonly removeCompanyButton: Locator;
+  private readonly removeCompanyConfirmPrompt: Locator;
+  private readonly updateCompanySuccessMessage: string;
+  private readonly createCompanySuccessMessage: string;
+  private readonly removeCompanySuccessMessage: string;
   private readonly deleteButton: Locator;
 
   constructor(
     public readonly page: Page,
     public readonly username: string
   ) {
-    this.newTeamMenu = this.page.getByRole('link', { name: 'New Team' });
-    this.newTeamNameInput = this.page.getByPlaceholder('Team Name');
-    this.createTeamDialogButton = this.page
+    this.newCompanyMenu = this.page.getByRole('link', { name: 'New Company' });
+    this.newCompanyNameInput = this.page.getByPlaceholder('Company Name');
+    this.createCompanyDialogButton = this.page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Create Team' });
-    this.removeTeamButton = this.page.getByRole('button', {
-      name: 'Remove Team',
+      .getByRole('button', { name: 'Create Company' });
+    this.removeCompanyButton = this.page.getByRole('button', {
+      name: 'Remove Company',
     });
-    this.removeTeamConfirmPrompt = this.page.getByText(
-      `Are you sure you want to delete the team? Deleting the team will delete all resources and data associated with the team forever.`
+    this.removeCompanyConfirmPrompt = this.page.getByText(
+      `Are you sure you want to delete the company? Deleting the company will delete all resources and data associated with the company forever.`
     );
-    this.updateTeamSuccessMessage = 'Changes saved successfully.';
-    this.createTeamSuccessMessage = 'Team created successfully.';
-    this.removeTeamSuccessMessage = 'Team removed successfully.';
+    this.updateCompanySuccessMessage = 'Changes saved successfully.';
+    this.createCompanySuccessMessage = 'Company created successfully.';
+    this.removeCompanySuccessMessage = 'Company removed successfully.';
 
     this.deleteButton = page.getByRole('button', { name: 'Delete' });
   }
@@ -51,12 +51,12 @@ export class SettingsPage {
 
   async isSettingsPageVisible() {
     await expect(
-      this.page.getByRole('heading', { name: 'Team Settings' })
+      this.page.getByRole('heading', { name: 'Company Settings' })
     ).toBeVisible();
   }
 
-  async fillTeamName(teamName: string) {
-    await this.page.locator('input[name="name"]').fill(teamName);
+  async fillCompanyName(companyName: string) {
+    await this.page.locator('input[name="name"]').fill(companyName);
   }
 
   async isSaveButtonDisabled() {
@@ -65,13 +65,13 @@ export class SettingsPage {
     ).toBeDisabled();
   }
 
-  async isTeamNameLengthErrorVisible() {
+  async isCompanyNameLengthErrorVisible() {
     await expect(
-      await this.page.getByText('Team name should have at most 50 characters')
+      await this.page.getByText('Company name should have at most 50 characters')
     ).toBeVisible();
   }
 
-  async isTeamSlugLengthErrorVisible() {
+  async isCompanySlugLengthErrorVisible() {
     await expect(
       await this.page.getByText('Slug should have at most 50 characters')
     ).toBeVisible();
@@ -93,27 +93,27 @@ export class SettingsPage {
     await this.page.getByRole('button', { name: 'Save Changes' }).click();
   }
 
-  async updateTeamName(newTeamName: string) {
-    await this.fillTeamName(newTeamName);
+  async updateCompanyName(newCompanyName: string) {
+    await this.fillCompanyName(newCompanyName);
     await this.clickSaveButton();
     await expect(
       this.page
         .getByRole('status')
-        .and(this.page.getByText(this.updateTeamSuccessMessage))
+        .and(this.page.getByText(this.updateCompanySuccessMessage))
     ).toBeVisible();
   }
 
-  async fillTeamSlug(teamSlug: string) {
-    await this.page.locator('input[name="slug"]').fill(teamSlug);
+  async fillCompanySlug(companySlug: string) {
+    await this.page.locator('input[name="slug"]').fill(companySlug);
   }
 
-  async updateTeamSlug(newTeamSlug: string) {
-    await this.fillTeamSlug(newTeamSlug);
+  async updateCompanySlug(newCompanySlug: string) {
+    await this.fillCompanySlug(newCompanySlug);
     await this.clickSaveButton();
     await expect(
       this.page
         .getByRole('status')
-        .and(this.page.getByText(this.updateTeamSuccessMessage))
+        .and(this.page.getByText(this.updateCompanySuccessMessage))
     ).toBeVisible();
   }
 
@@ -127,46 +127,46 @@ export class SettingsPage {
     await expect(
       this.page
         .getByRole('status')
-        .and(this.page.getByText(this.updateTeamSuccessMessage))
+        .and(this.page.getByText(this.updateCompanySuccessMessage))
     ).toBeVisible();
   }
 
-  async checkTeamName(teamName: string) {
-    await expect(this.page.locator('input[name="name"]')).toHaveValue(teamName);
+  async checkCompanyName(companyName: string) {
+    await expect(this.page.locator('input[name="name"]')).toHaveValue(companyName);
   }
 
-  async checkTeamSlug(teamSlug: string) {
-    await expect(this.page.locator('input[name="slug"]')).toHaveValue(teamSlug);
+  async checkCompanySlug(companySlug: string) {
+    await expect(this.page.locator('input[name="slug"]')).toHaveValue(companySlug);
   }
 
   async checkDomain(domain: string) {
     await expect(this.page.locator('input[name="domain"]')).toHaveValue(domain);
   }
 
-  async createNewTeam(teamName: string) {
+  async createNewCompany(companyName: string) {
     await this.page.getByText('Example').first().click();
-    await this.newTeamMenu.click();
+    await this.newCompanyMenu.click();
     await expect(
-      this.page.getByRole('heading', { name: 'Create Team' })
+      this.page.getByRole('heading', { name: 'Create Company' })
     ).toBeVisible();
-    await this.newTeamNameInput.fill(teamName);
-    await this.createTeamDialogButton.click();
+    await this.newCompanyNameInput.fill(companyName);
+    await this.createCompanyDialogButton.click();
     await expect(
       this.page
         .getByRole('status')
-        .and(this.page.getByText(this.createTeamSuccessMessage))
+        .and(this.page.getByText(this.createCompanySuccessMessage))
     ).toBeVisible();
   }
 
-  async removeTeam(teamSlug: string) {
-    this.goto(teamSlug);
-    this.removeTeamButton.click();
-    await expect(this.removeTeamConfirmPrompt).toBeVisible();
+  async removeCompany(companySlug: string) {
+    this.goto(companySlug);
+    this.removeCompanyButton.click();
+    await expect(this.removeCompanyConfirmPrompt).toBeVisible();
     this.deleteButton.click();
     await expect(
       this.page
         .getByRole('status')
-        .and(this.page.getByText(this.removeTeamSuccessMessage))
+        .and(this.page.getByText(this.removeCompanySuccessMessage))
     ).toBeVisible();
   }
 
@@ -175,8 +175,8 @@ export class SettingsPage {
     await this.page.waitForURL(`/settings/${pageName}`);
   }
 
-  async goto(teamSlug?: string) {
-    await this.page.goto(`/teams/${teamSlug}/settings`);
-    await this.page.waitForURL(`/teams/${teamSlug}/settings`);
+  async goto(companySlug?: string) {
+    await this.page.goto(`/companies/${companySlug}/settings`);
+    await this.page.waitForURL(`/companies/${companySlug}/settings`);
   }
 }

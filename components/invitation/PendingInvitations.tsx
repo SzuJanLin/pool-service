@@ -1,24 +1,24 @@
 import { Error, LetterAvatar, Loading } from '@/components/shared';
 import { defaultHeaders } from '@/lib/common';
-import { Team } from '@prisma/client';
+import { Company } from '@prisma/client';
 import useInvitations from 'hooks/useInvitations';
 import { useTranslation } from 'next-i18next';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import type { ApiResponse } from 'types';
 import ConfirmationDialog from '../shared/ConfirmationDialog';
-import { TeamInvitation } from 'models/invitation';
+import { CompanyInvitation } from 'models/invitation';
 import { Table } from '@/components/shared/table/Table';
 
-const PendingInvitations = ({ team }: { team: Team }) => {
+const PendingInvitations = ({ company }: { company: Company }) => {
   const [selectedInvitation, setSelectedInvitation] =
-    useState<TeamInvitation | null>(null);
+    useState<CompanyInvitation | null>(null);
 
   const [confirmationDialogVisible, setConfirmationDialogVisible] =
     useState(false);
 
   const { isLoading, isError, invitations, mutateInvitation } = useInvitations({
-    slug: team.slug,
+    slug: company.slug,
     sentViaEmail: true,
   });
 
@@ -32,7 +32,7 @@ const PendingInvitations = ({ team }: { team: Team }) => {
     return <Error message={isError.message} />;
   }
 
-  const deleteInvitation = async (invitation: TeamInvitation | null) => {
+  const deleteInvitation = async (invitation: CompanyInvitation | null) => {
     if (!invitation) {
       return;
     }
@@ -40,7 +40,7 @@ const PendingInvitations = ({ team }: { team: Team }) => {
     const sp = new URLSearchParams({ id: invitation.id });
 
     const response = await fetch(
-      `/api/teams/${team.slug}/invitations?${sp.toString()}`,
+      `/api/companies/${company.slug}/invitations?${sp.toString()}`,
       {
         method: 'DELETE',
         headers: defaultHeaders,

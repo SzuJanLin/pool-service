@@ -1,6 +1,6 @@
 import { EmptyState, WithLoadingAndError } from '@/components/shared';
 import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
-import type { ApiKey, Team } from '@prisma/client';
+import type { ApiKey, Company } from '@prisma/client';
 import { useTranslation } from 'next-i18next';
 import { useState } from 'react';
 import { Button } from 'react-daisyui';
@@ -11,12 +11,12 @@ import useAPIKeys from 'hooks/useAPIKeys';
 import { Table } from '@/components/shared/table/Table';
 
 interface APIKeysProps {
-  team: Team;
+  company: Company;
 }
 
-const APIKeys = ({ team }: APIKeysProps) => {
+const APIKeys = ({ company }: APIKeysProps) => {
   const { t } = useTranslation('common');
-  const { data, isLoading, error, mutate } = useAPIKeys(team.slug);
+  const { data, isLoading, error, mutate } = useAPIKeys(company.slug);
   const [selectedApiKey, setSelectedApiKey] = useState<ApiKey | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [confirmationDialogVisible, setConfirmationDialogVisible] =
@@ -29,7 +29,7 @@ const APIKeys = ({ team }: APIKeysProps) => {
     }
 
     const response = await fetch(
-      `/api/teams/${team.slug}/api-keys/${apiKey.id}`,
+      `/api/companies/${company.slug}/api-keys/${apiKey.id}`,
       {
         method: 'DELETE',
       }
@@ -123,7 +123,7 @@ const APIKeys = ({ team }: APIKeysProps) => {
           </>
         )}
         <NewAPIKey
-          team={team}
+          company={company}
           createModalVisible={createModalVisible}
           setCreateModalVisible={setCreateModalVisible}
         />

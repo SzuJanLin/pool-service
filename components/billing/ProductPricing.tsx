@@ -2,7 +2,7 @@ import toast from 'react-hot-toast';
 import { Button } from 'react-daisyui';
 import { useTranslation } from 'next-i18next';
 
-import useTeam from 'hooks/useTeam';
+import useCompany from 'hooks/useCompany';
 import { Price } from '@prisma/client';
 import PaymentButton from './PaymentButton';
 import { Service, Subscription } from '@prisma/client';
@@ -13,12 +13,12 @@ interface ProductPricingProps {
 }
 
 const ProductPricing = ({ plans, subscriptions }: ProductPricingProps) => {
-  const { team } = useTeam();
+  const { company } = useCompany();
   const { t } = useTranslation('common');
 
   const initiateCheckout = async (price: string, quantity?: number) => {
     const res = await fetch(
-      `/api/teams/${team?.slug}/payments/create-checkout-session`,
+      `/api/companies/${company?.slug}/payments/create-checkout-session`,
       {
         method: 'POST',
         headers: {
