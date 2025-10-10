@@ -10,7 +10,7 @@ datasource db {
 enum Role {
   ADMIN
   OWNER
-  MEMBER
+  TECH
 }
 
 model Account {
@@ -74,7 +74,7 @@ model Company {
   name            String
   slug            String       @unique
   domain          String?      @unique
-  defaultRole     Role         @default(MEMBER)
+  defaultRole     Role         @default(TECH)
   billingId       String?
   billingProvider String?
   createdAt       DateTime     @default(now())
@@ -90,7 +90,7 @@ model CompanyMember {
   id        String   @id @default(uuid())
   companyId    String
   userId    String
-  role      Role     @default(MEMBER)
+  role      Role     @default(TECH)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
@@ -105,7 +105,7 @@ model Invitation {
   id             String   @id @default(uuid())
   companyId         String
   email          String?
-  role           Role     @default(MEMBER)
+  role           Role     @default(TECH)
   token          String   @unique
   expires        DateTime
   invitedBy      String

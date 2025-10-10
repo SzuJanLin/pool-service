@@ -71,20 +71,6 @@ const CompanySettings = ({ company }: { company: Company }) => {
                 onChange={formik.handleChange}
                 error={formik.errors.name}
               />
-              <InputWithLabel
-                name="slug"
-                label={t('company-slug')}
-                value={formik.values.slug}
-                onChange={formik.handleChange}
-                error={formik.errors.slug}
-              />
-              <InputWithLabel
-                name="domain"
-                label={t('company-domain')}
-                value={formik.values.domain ? formik.values.domain : ''}
-                onChange={formik.handleChange}
-                error={formik.errors.domain}
-              />
             </div>
           </Card.Body>
           <AccessControl resource="company" actions={['update']}>

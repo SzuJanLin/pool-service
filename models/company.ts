@@ -352,7 +352,7 @@ Limit  (cost=0.44..16.82 rows=1 width=159) (actual time=0.009..0.010 rows=0 loop
               Filter: (id IS NOT NULL)
         ->  Index Scan using "CompanyMember_companyId_userId_key" on "CompanyMember"  (cost=0.28..8.32 rows=1 width=131) (never executed)
               Index Cond: (("companyId" = j1.id) AND ("userId" = '5de1dfe6-edc0-4ef8-9858-0f7250b1022e'::text))
-              Filter: (role = ANY (ARRAY[('ADMIN'::cstring)::"Role", ('MEMBER'::cstring)::"Role", ('OWNER'::cstring)::"Role"]))
+              Filter: (role = ANY (ARRAY[('ADMIN'::cstring)::"Role", ('TECH'::cstring)::"Role", ('OWNER'::cstring)::"Role"]))
 Planning Time: 1.073 ms
 Execution Time: 0.047 ms
 
@@ -376,7 +376,7 @@ WHERE (
         (
             "j1"."slug" = 'boxyhq' AND ("j1"."id" IS NOT NULL)
         ) AND "public"."CompanyMember"."role" IN 
-            (CAST('ADMIN'::text AS "public"."Role"),CAST('MEMBER'::text AS "public"."Role"),CAST('OWNER'::text AS "public"."Role")
+            (CAST('ADMIN'::text AS "public"."Role"),CAST('TECH'::text AS "public"."Role"),CAST('OWNER'::text AS "public"."Role")
         )
     ) 
 LIMIT 1 OFFSET 0;
@@ -399,7 +399,7 @@ Limit  (cost=0.00..2.06 rows=1 width=159) (actual time=0.049..0.050 rows=1 loops
   ->  Nested Loop  (cost=0.00..2.06 rows=1 width=159) (actual time=0.049..0.049 rows=1 loops=1)
         Join Filter: ("CompanyMember"."companyId" = j1.id)
         ->  Seq Scan on "CompanyMember"  (cost=0.00..1.03 rows=1 width=131) (actual time=0.009..0.009 rows=1 loops=1)
-              Filter: (("userId" = '34f3bc0e-e955-400b-892e-395edc6fa727'::text) AND (role = ANY (ARRAY[('ADMIN'::cstring)::"Role", ('MEMBER'::cstring)::"Role", ('OWNER'::cstring)::"Role"])))
+              Filter: (("userId" = '34f3bc0e-e955-400b-892e-395edc6fa727'::text) AND (role = ANY (ARRAY[('ADMIN'::cstring)::"Role", ('TECH'::cstring)::"Role", ('OWNER'::cstring)::"Role"])))
         ->  Seq Scan on "Company" j1  (cost=0.00..1.01 rows=1 width=37) (actual time=0.009..0.009 rows=1 loops=1)
               Filter: ((id IS NOT NULL) AND (slug = 'boxyhq'::text))
 Planning Time: 1.513 ms
@@ -421,7 +421,7 @@ export const getCompanyMember = async (userId: string, slug: string) => {
         slug,
       },
       role: {
-        in: ['ADMIN', 'MEMBER', 'OWNER'],
+        in: ['ADMIN', 'TECH', 'OWNER'],
       },
     },
     include: {

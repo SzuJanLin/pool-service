@@ -21,7 +21,7 @@ const InviteMember = ({ visible, setVisible, company }: InviteMemberProps) => {
       <Modal.Body>
         <div className="grid grid-cols-1 divide-y py-2">
           <InviteViaEmail setVisible={setVisible} company={company} />
-          <InviteViaLink company={company} />
+          {/* <InviteViaLink company={company} /> */}
         </div>
       </Modal.Body>
     </Modal>

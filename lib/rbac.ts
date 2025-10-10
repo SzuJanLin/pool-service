@@ -12,7 +12,7 @@ export async function validateMembershipOperation(
   const updatingMember = await getCompanyMember(memberId, companyMember.company.slug);
   // Member and Admin can't update the role of Owner
   if (
-    (companyMember.role === Role.MEMBER || companyMember.role === Role.ADMIN) &&
+    (companyMember.role === Role.TECH || companyMember.role === Role.ADMIN) &&
     updatingMember.role === Role.OWNER
   ) {
     throw new ApiError(
@@ -22,7 +22,7 @@ export async function validateMembershipOperation(
   }
   // Member can't update the role of Admin & Owner
   if (
-    companyMember.role === Role.MEMBER &&
+    companyMember.role === Role.TECH &&
     (updatingMember.role === Role.ADMIN || updatingMember.role === Role.OWNER)
   ) {
     throw new ApiError(
@@ -41,7 +41,7 @@ export async function validateMembershipOperation(
 
   // Member can't make anyone an Admin or Owner
   if (
-    companyMember.role === Role.MEMBER &&
+    companyMember.role === Role.TECH &&
     (operationMeta?.role === Role.ADMIN || operationMeta?.role === Role.OWNER)
   ) {
     throw new ApiError(

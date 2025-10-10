@@ -435,7 +435,7 @@ const linkToCompany = async (profile: Profile, userId: string) => {
 
   // Sort out roles
   const roles = profile.roles || profile.groups || [];
-  let userRole: Role = company.defaultRole || Role.MEMBER;
+  let userRole: Role = company.defaultRole || Role.TECH;
 
   for (let role of roles) {
     if (env.groupPrefix) {

@@ -23,14 +23,21 @@ interface CompanyTabProps {
 const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTabProps) => {
   const { canAccess } = useCanAccess();
 
-  const navigations = [
-    {
+  const navigations: {
+    name: string;
+    href: string;
+    active: boolean;
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  }[] = [];
+
+  if (canAccess('company', ['update', 'read'])) {
+    navigations.push(    {
       name: 'Settings',
       href: `/companies/${company.slug}/settings`,
       active: activeTab === 'settings',
       icon: Cog6ToothIcon,
-    },
-  ];
+    },);
+  }
 
   if (canAccess('company_member', ['create', 'update', 'read', 'delete'])) {
     navigations.push({

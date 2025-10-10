@@ -58,7 +58,7 @@ export class MemberPage {
   async companyMemberExists(
     name: string,
     email: string,
-    role: 'OWNER' | 'MEMBER'
+    role: 'OWNER' | 'TECH'
   ) {
     await expect(this.memberEntryRowName(name)).toBeVisible();
     await expect(this.memberEntryRowEmail(email)).toBeVisible();

@@ -1,5 +1,4 @@
 import {
-  RectangleStackIcon,
   ShieldCheckIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -11,12 +10,6 @@ const UserNavigation = ({ activePathname }: NavigationProps) => {
   const { t } = useTranslation('common');
 
   const menus: MenuItem[] = [
-    {
-      name: t('all-companies'),
-      href: '/companies',
-      icon: RectangleStackIcon,
-      active: activePathname === '/companies',
-    },
     {
       name: t('account'),
       href: '/settings/account',

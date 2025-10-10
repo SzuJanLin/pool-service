@@ -32,7 +32,7 @@ export const handleEvents = async (event: DirectorySyncEvent) => {
       },
     });
 
-    await addCompanyMember(companyId, user.id, Role.MEMBER);
+    await addCompanyMember(companyId, user.id, Role.TECH);
   }
 
   // User has been updated
@@ -70,7 +70,7 @@ export const handleEvents = async (event: DirectorySyncEvent) => {
     });
 
     // Reactivation of user by adding them back to the company
-    await addCompanyMember(companyId, user.id, Role.MEMBER);
+    await addCompanyMember(companyId, user.id, Role.TECH);
   }
 
   // User has been removed

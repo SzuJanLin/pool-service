@@ -4,6 +4,7 @@ import UpdateName from './UpdateName';
 import UpdateEmail from './UpdateEmail';
 import UpdateTheme from './UpdateTheme';
 import env from '@/lib/env';
+import UpdatePassword from './UpdatePassword';
 
 interface UpdateAccountProps {
   user: Partial<User>;
@@ -17,6 +18,7 @@ const UpdateAccount = ({ user, allowEmailChange }: UpdateAccountProps) => {
       <UpdateEmail user={user} allowEmailChange={allowEmailChange} />
       <UploadAvatar user={user} />
       {env.darkModeEnabled && <UpdateTheme />}
+      <UpdatePassword />
     </div>
   );
 };

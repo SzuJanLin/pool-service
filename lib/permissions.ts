@@ -24,8 +24,8 @@ export type Permission = {
 
 export const availableRoles = [
   {
-    id: Role.MEMBER,
-    name: 'Member',
+    id: Role.TECH,
+    name: 'Tech',
   },
   {
     id: Role.ADMIN,
@@ -110,7 +110,7 @@ export const permissions: RolePermissions = {
       actions: '*',
     },
   ],
-  MEMBER: [
+  TECH: [
     {
       resource: 'company',
       actions: ['read', 'leave'],

@@ -87,7 +87,7 @@ async function seedCompanies() {
 
 async function seedCompanyMembers(users: any[], companies: any[]) {
   const newCompanyMembers: any[] = [];
-  const roles = ['OWNER', 'MEMBER'];
+  const roles = ['OWNER', 'TECH'];
   for (const user of users) {
     const count = Math.floor(Math.random() * (COMPANY_COUNT - 1)) + 2;
     const companyUsed = new Set();
@@ -103,7 +103,7 @@ async function seedCompanyMembers(users: any[], companies: any[]) {
             user.email === ADMIN_EMAIL
               ? 'OWNER'
               : user.email === USER_EMAIL
-                ? 'MEMBER'
+                ? 'TECH'
                 : roles[Math.floor(Math.random() * 2)],
           companyId,
           userId: user.id,
@@ -131,7 +131,7 @@ async function seedInvitations(companies: any[], users: any[]) {
             companyId: company.id,
             invitedBy: users[Math.floor(Math.random() * users.length)].id,
             email: faker.internet.email(),
-            role: 'MEMBER',
+            role: 'TECH',
             sentViaEmail: true,
             token: randomUUID(),
             allowedDomains: [],
