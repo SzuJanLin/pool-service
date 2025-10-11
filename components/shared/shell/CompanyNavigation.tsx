@@ -20,9 +20,9 @@ const CompanyNavigation = ({ slug, activePathname }: NavigationItemsProps) => {
     },
     {
       name: t('settings'),
-      href: `/companies/${slug}/settings`,
+      href: `/companies/${slug}/members`,
       icon: Cog6ToothIcon,
-      active: activePathname === `/companies/${slug}/settings`,
+      active: activePathname === `/companies/${slug}/members` || activePathname === `/companies/${slug}/settings`,
     },
         {
       name: t('account'),

@@ -113,7 +113,14 @@ export const permissions: RolePermissions = {
   TECH: [
     {
       resource: 'company',
-      actions: ['read', 'leave'],
+      actions: ['read'],
     },
+    {
+      resource: 'company_member',
+      actions: ['read'],
+    },
+    {
+      resource: 'company_invitation',
+      actions: ['read'],}
   ],
 };

@@ -30,6 +30,15 @@ const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTab
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   }[] = [];
 
+  if (canAccess('company_member', ['create', 'update', 'read', 'delete'])) {
+    navigations.push({
+      name: 'Members',
+      href: `/companies/${company.slug}/members`,
+      active: activeTab === 'members',
+      icon: UserPlusIcon,
+    });
+  }
+  
   if (canAccess('company', ['update', 'read'])) {
     navigations.push(    {
       name: 'Settings',
@@ -39,14 +48,6 @@ const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTab
     },);
   }
 
-  if (canAccess('company_member', ['create', 'update', 'read', 'delete'])) {
-    navigations.push({
-      name: 'Members',
-      href: `/companies/${company.slug}/members`,
-      active: activeTab === 'members',
-      icon: UserPlusIcon,
-    });
-  }
 
   if (
     companyFeatures.sso &&

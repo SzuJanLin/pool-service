@@ -95,9 +95,11 @@ const Members = ({ company }: { company: Company }) => {
             {t('members-description')}
           </p>
         </div>
-        <Button color="primary" size="md" onClick={() => setVisible(!visible)}>
-          {t('add-member')}
-        </Button>
+        {canAccess('company_invitation', ['create']) && (
+          <Button color="primary" size="md" onClick={() => setVisible(!visible)}>
+            {t('add-member')}
+          </Button>
+        )}
       </div>
 
       <Table

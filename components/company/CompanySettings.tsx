@@ -1,6 +1,6 @@
 import { Card, InputWithLabel } from '@/components/shared';
 import { defaultHeaders } from '@/lib/common';
-import { Company } from '@prisma/client';
+import { Company, CompanyMember } from '@prisma/client';
 import { useFormik } from 'formik';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
@@ -13,10 +13,12 @@ import { AccessControl } from '../shared/AccessControl';
 import { z } from 'zod';
 import { updateCompanySchema } from '@/lib/zod';
 import useCompanies from 'hooks/useCompanies';
+import useCanAccess from 'hooks/useCanAccess';
 
 const CompanySettings = ({ company }: { company: Company }) => {
   const router = useRouter();
   const { t } = useTranslation('common');
+    const { canAccess } = useCanAccess();
   const { mutateCompanies } = useCompanies();
 
   const formik = useFormik<z.infer<typeof updateCompanySchema>>({
@@ -70,6 +72,7 @@ const CompanySettings = ({ company }: { company: Company }) => {
                 value={formik.values.name}
                 onChange={formik.handleChange}
                 error={formik.errors.name}
+                disabled={canAccess('company', ['update']) ? false : true}
               />
             </div>
           </Card.Body>

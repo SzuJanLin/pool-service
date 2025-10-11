@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 import Modal from '../shared/Modal';
 import type { Company } from '@prisma/client';
 import InviteViaEmail from './InviteViaEmail';
-import InviteViaLink from './InviteViaLink';
+// import InviteViaLink from './InviteViaLink';
 
 interface InviteMemberProps {
   company: Company;
