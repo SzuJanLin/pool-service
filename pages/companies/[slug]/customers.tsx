@@ -3,16 +3,12 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import type { NextPageWithLayout } from 'types';
 import { useTranslation } from 'next-i18next';
 import CustomerPagination from '@/components/customers/CustomerPagination';
-import { Button } from 'react-daisyui';
-import AddCustomer from '@/components/customers/AddCustomer';
-import { useState } from 'react';
 import useCompany from 'hooks/useCompany';
 import { Error, Loading } from '@/components/shared';
 
 const Customers: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const { isLoading, isError, company } = useCompany();
-  const [addCustomerVisible, setAddCustomerVisible] = useState(false);
 
   if (isLoading) {
     return <Loading />;
@@ -34,14 +30,9 @@ const Customers: NextPageWithLayout = () => {
             {t('customers')}
           </h2>
         </div>
-          <Button color="primary" size="md" onClick={() => setAddCustomerVisible(true)}>
-            {t('add-customer')}
-          </Button>
       </div>
 
-
       <CustomerPagination company={company} />
-      <AddCustomer visible={addCustomerVisible} setVisible={setAddCustomerVisible} company={company} />
     </div>
  
   );

@@ -3,22 +3,36 @@ import type { Customer } from '@prisma/client';
 import useSWR, { mutate } from 'swr';
 import type { ApiResponse } from 'types';
 
-const useCustomers = (slug: string) => {
-  const url = `/api/companies/${slug}/customers`;
+interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
 
-  const { data, error, isLoading } = useSWR<ApiResponse<Customer[]>>(
+interface CustomersResponse {
+  data?: Customer[];
+  pagination?: PaginationInfo;
+}
+
+const useCustomers = (slug: string, page: number = 1, pageSize: number = 10) => {
+  const url = `/api/companies/${slug}/customers?page=${page}&pageSize=${pageSize}`;
+
+  const { data, error, isLoading } = useSWR<CustomersResponse>(
     url,
     fetcher
   );
 
   const mutateCustomers = async () => {
-    mutate(url);
+    // Mutate all customer pages
+    mutate((key) => typeof key === 'string' && key.startsWith(`/api/companies/${slug}/customers`));
   };
 
   return {
     isLoading,
     isError: error,
     customers: data?.data,
+    pagination: data?.pagination,
     mutateCustomers,
   };
 };

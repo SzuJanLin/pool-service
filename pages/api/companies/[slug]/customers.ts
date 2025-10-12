@@ -1,10 +1,6 @@
-import { ApiError } from '@/lib/errors';
-import { sendAudit } from '@/lib/retraced';
-import { sendEvent } from '@/lib/svix';
 import { throwIfNoCompanyAccess } from 'models/company';
 import { throwIfNotAllowed } from 'models/user';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { recordMetric } from '@/lib/metrics';
 import {
   createCustomer,
   getCustomers,
@@ -57,11 +53,25 @@ const handleGET = async (req: NextApiRequest, res: NextApiResponse) => {
   const companyMember = await throwIfNoCompanyAccess(req, res);
   throwIfNotAllowed(companyMember, 'company', 'read');
 
-  const customers = await getCustomers(companyMember.company.id);
+  const page = req.query.page ? parseInt(req.query.page as string) : 1;
+  const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 10;
 
-  recordMetric('customer.fetched');
+  const { customers, totalCount } = await getCustomers(companyMember.company.id, {
+    page,
+    pageSize,
+  });
 
-  res.status(200).json({ data: customers });
+  // recordMetric('customer.fetched');
+
+  res.status(200).json({
+    data: customers,
+    pagination: {
+      page,
+      pageSize,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+    },
+  });
 };
 
 // Create a new customer
@@ -98,18 +108,9 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
         id: companyMember.company.id,
       },
     },
-  });
+  } as any);
 
-  await sendEvent(companyMember.companyId, 'customer.created', customer);
-
-  sendAudit({
-    action: 'customer.create',
-    crud: 'c',
-    user: companyMember.user,
-    company: companyMember.company,
-  });
-
-  recordMetric('customer.created');
+  // recordMetric('customer.created');
 
   res.status(201).json({ data: customer });
 };
@@ -124,21 +125,12 @@ const handleDELETE = async (req: NextApiRequest, res: NextApiResponse) => {
     req.query as { customerId: string }
   );
 
-  const deletedCustomer = await deleteCustomer(
+  await deleteCustomer(
     customerId,
     companyMember.company.id
   );
 
-  await sendEvent(companyMember.companyId, 'customer.deleted', deletedCustomer);
-
-  sendAudit({
-    action: 'customer.delete',
-    crud: 'd',
-    user: companyMember.user,
-    company: companyMember.company,
-  });
-
-  recordMetric('customer.deleted');
+  // recordMetric('customer.deleted');
 
   res.status(200).json({ data: {} });
 };
@@ -179,16 +171,7 @@ const handlePATCH = async (req: NextApiRequest, res: NextApiResponse) => {
     }
   );
 
-  await sendEvent(companyMember.companyId, 'customer.updated', updatedCustomer);
-
-  sendAudit({
-    action: 'customer.update',
-    crud: 'u',
-    user: companyMember.user,
-    company: companyMember.company,
-  });
-
-  recordMetric('customer.updated');
+  // recordMetric('customer.updated');
 
   res.status(200).json({ data: updatedCustomer });
 };

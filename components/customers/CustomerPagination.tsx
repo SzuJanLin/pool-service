@@ -4,6 +4,7 @@ import { Company, Customer } from '@prisma/client';
 import useCustomers from 'hooks/useCustomers';
 import { useTranslation } from 'next-i18next';
 import { useState } from 'react';
+import { Button } from 'react-daisyui';
 import AddCustomer from './AddCustomer';
 
 interface CustomerPaginationProps {
@@ -12,9 +13,34 @@ interface CustomerPaginationProps {
 
 const CustomerPagination = ({ company }: CustomerPaginationProps) => {
   const { t } = useTranslation('common');
-  const { isLoading, isError, customers } = useCustomers(company.slug);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(13);
+  const { isLoading, isError, customers, pagination } = useCustomers(
+    company.slug,
+    currentPage,
+    pageSize
+  );
   const [editCustomerVisible, setEditCustomerVisible] = useState(false);
+  const [addCustomerVisible, setAddCustomerVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const handleAddCustomer = () => {
+    setSelectedCustomer(null);
+    setAddCustomerVisible(true);
+  };
+
+  const handleEditCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setEditCustomerVisible(true);
+  };
+
+  const handleCloseCustomerModal = () => {
+    setEditCustomerVisible(false);
+    setAddCustomerVisible(false);
+    setSelectedCustomer(null);
+    // Reset to page 1 to see newly added customer
+    setCurrentPage(1);
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -40,8 +66,79 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
     t('actions'),
   ];
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const renderPagination = () => {
+    if (!pagination || pagination.totalPages <= 1) return null;
+
+    const { page, totalPages, totalCount } = pagination;
+    const startItem = (page - 1) * pageSize + 1;
+    const endItem = Math.min(page * pageSize, totalCount);
+
+    return (
+      <div className="flex items-center justify-between mt-4 px-4 py-3 border-t">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>
+            {t('showing')} {startItem} {t('to')} {endItem} {t('of')} {totalCount} {t('results')}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+          >
+            {t('previous')}
+          </Button>
+          
+          {/* Page numbers */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+            // Show first, last, current, and pages around current
+            if (
+              pageNum === 1 ||
+              pageNum === totalPages ||
+              (pageNum >= page - 1 && pageNum <= page + 1)
+            ) {
+              return (
+                <Button
+                  key={pageNum}
+                  size="sm"
+                  variant="outline"
+                  color={pageNum === page ? 'primary' : undefined}
+                  onClick={() => handlePageChange(pageNum)}
+                >
+                  {pageNum}
+                </Button>
+              );
+            } else if (pageNum === page - 2 || pageNum === page + 2) {
+              return <span key={pageNum} className="px-2">...</span>;
+            }
+            return null;
+          })}
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+          >
+            {t('next')}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
+      <div className="flex justify-end mb-4">
+        <Button color="primary" size="md" onClick={handleAddCustomer}>
+          {t('add-customer')}
+        </Button>
+      </div>
       <div className="mt-6">
         <Table
           cols={cols}
@@ -86,10 +183,7 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
                   {
                     color: 'primary',
                     text: t('edit'),
-                    onClick: () => {
-                      setSelectedCustomer(customer);
-                      setEditCustomerVisible(true);
-                    },
+                    onClick: () => handleEditCustomer(customer),
                   },
                 ],
               },
@@ -97,10 +191,11 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
           };
           })}
         />
+        {renderPagination()}
       </div>
       <AddCustomer
-        visible={editCustomerVisible}
-        setVisible={setEditCustomerVisible}
+        visible={editCustomerVisible || addCustomerVisible}
+        setVisible={handleCloseCustomerModal}
         company={company}
         customer={selectedCustomer}
       />

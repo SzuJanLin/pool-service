@@ -9,15 +9,35 @@ export const createCustomer = async (
   });
 };
 
-export const getCustomers = async (companyId: string): Promise<Customer[]> => {
-  return await prisma.customer.findMany({
-    where: {
-      companyId,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+export const getCustomers = async (
+  companyId: string,
+  options?: {
+    page?: number;
+    pageSize?: number;
+  }
+): Promise<{ customers: Customer[]; totalCount: number }> => {
+  const { page = 1, pageSize = 10 } = options || {};
+  const skip = (page - 1) * pageSize;
+
+  const [customers, totalCount] = await Promise.all([
+    prisma.customer.findMany({
+      where: {
+        companyId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip,
+      take: pageSize,
+    }),
+    prisma.customer.count({
+      where: {
+        companyId,
+      },
+    }),
+  ]);
+
+  return { customers, totalCount };
 };
 
 export const getCustomer = async (
@@ -37,14 +57,20 @@ export const updateCustomer = async (
   companyId: string,
   data: Prisma.CustomerUpdateInput
 ): Promise<Customer> => {
+  // First verify the customer belongs to the company
+  const customer = await prisma.customer.findFirst({
+    where: { id, companyId },
+  });
+
+  if (!customer) {
+    throw new Error('Customer not found');
+  }
+
   return await prisma.customer.update({
     where: {
       id,
     },
-    data: {
-      ...data,
-      companyId,
-    },
+    data,
   });
 };
 
