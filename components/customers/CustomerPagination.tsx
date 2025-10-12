@@ -26,7 +26,6 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
     debouncedSearch
   );
   const [editCustomerVisible, setEditCustomerVisible] = useState(false);
-  const [addCustomerVisible, setAddCustomerVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   // Debounce search input
@@ -39,22 +38,14 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleAddCustomer = () => {
-    setSelectedCustomer(null);
-    setAddCustomerVisible(true);
-  };
-
   const handleEditCustomer = (customer: Customer) => {
     setSelectedCustomer(customer);
     setEditCustomerVisible(true);
   };
 
-  const handleCloseCustomerModal = () => {
+  const handleCloseEditModal = () => {
     setEditCustomerVisible(false);
-    setAddCustomerVisible(false);
     setSelectedCustomer(null);
-    // Reset to page 1 to see newly added customer
-    setCurrentPage(1);
   };
 
   const hasSearchQuery = debouncedSearch.length > 0;
@@ -135,7 +126,7 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <div className="w-full sm:w-96">
           <input
             type="text"
@@ -145,9 +136,6 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
             className="input input-bordered w-full"
           />
         </div>
-        <Button color="primary" size="md" onClick={handleAddCustomer}>
-          {t('add-customer')}
-        </Button>
       </div>
 
       {isLoading ? (
@@ -218,8 +206,8 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
       )}
       
       <AddCustomer
-        visible={editCustomerVisible || addCustomerVisible}
-        setVisible={handleCloseCustomerModal}
+        visible={editCustomerVisible}
+        setVisible={handleCloseEditModal}
         company={company}
         customer={selectedCustomer}
       />
