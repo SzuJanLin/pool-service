@@ -58,9 +58,7 @@ module.exports = [{
     },
 }, {
     files: [
-        "components/defaultLanding/**/*.tsx",
-        "components/emailTemplates/**/*.tsx",
-        "pages/index.tsx",
+        "**/*.tsx",
     ],
 
     rules: {

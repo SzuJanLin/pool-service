@@ -82,7 +82,7 @@ model Company {
   members         CompanyMember[]
   invitations     Invitation[]
   apiKeys         ApiKey[]
-
+  customers       Customer[]
   @@index([billingId])
 }
 
@@ -182,6 +182,33 @@ model Price {
   created       DateTime
 
   service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+  LOST
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  companyId     String
+  firstName  String
+  lastName   String
+  email      String?
+  phone      String?
+  addressStreet String?
+  addressCity   String?
+  addressState  String?
+  addressZip    String?
+  notes      String?
+  status     CustomerStatus @default(LEAD)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  @@index([companyId])
 }
 
 model jackson_store {

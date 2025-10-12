@@ -25,7 +25,14 @@ import {
   name,
   image,
   eventTypes,
+  customerId,
+  firstName,
+  lastName,
+  phoneNumber,
+  addressField,
+  notes,
 } from './primitives';
+import { CustomerStatus } from '@prisma/client';
 
 export const createApiKeySchema = z.object({
   name: name(50),
@@ -171,3 +178,34 @@ export const ssoVerifySchema = z
   .refine((data) => data.email || data.slug, {
     message: 'At least one of email or slug is required',
   });
+
+export const createCustomerSchema = z.object({
+  firstName,
+  lastName,
+  email: email.optional().or(z.literal('')),
+  phone: phoneNumber,
+  addressStreet: addressField,
+  addressCity: addressField,
+  addressState: addressField,
+  addressZip: addressField,
+  notes,
+  status: z.nativeEnum(CustomerStatus).default(CustomerStatus.LEAD),
+});
+
+export const updateCustomerSchema = z.object({
+  customerId,
+  firstName: firstName.optional(),
+  lastName: lastName.optional(),
+  email: email.optional().or(z.literal('')),
+  phone: phoneNumber,
+  addressStreet: addressField,
+  addressCity: addressField,
+  addressState: addressField,
+  addressZip: addressField,
+  notes,
+  status: z.nativeEnum(CustomerStatus).optional(),
+});
+
+export const deleteCustomerSchema = z.object({
+  customerId,
+});

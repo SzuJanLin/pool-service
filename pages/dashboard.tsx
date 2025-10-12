@@ -16,7 +16,7 @@ const Dashboard: NextPageWithLayout = () => {
     }
 
     if (companies.length > 0) {
-      router.push(`/companies/${companies[0].slug}/products`);
+      router.push(`/companies/${companies[0].slug}/dashboard`);
     } else {
       router.push('companies?newCompany=true');
     }

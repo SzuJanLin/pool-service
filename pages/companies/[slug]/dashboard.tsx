@@ -3,7 +3,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import type { NextPageWithLayout } from 'types';
 import { useTranslation } from 'next-i18next';
 
-const Products: NextPageWithLayout = () => {
+const Dashboard: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
 
   return (
@@ -23,4 +23,4 @@ export async function getServerSideProps({
   };
 }
 
-export default Products;
+export default Dashboard;

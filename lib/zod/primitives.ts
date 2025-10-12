@@ -262,3 +262,53 @@ export const memberId = z
     maxLengthPolicies.memberId,
     `Member id should be at most ${maxLengthPolicies.memberId} characters`
   );
+
+export const customerId = z
+  .string({
+    required_error: 'Customer id is required',
+    invalid_type_error: 'Customer id must be a string',
+  })
+  .min(1, 'Customer id is required');
+
+export const firstName = z
+  .string({
+    required_error: 'First name is required',
+    invalid_type_error: 'First name must be a string',
+  })
+  .min(1, 'First name is required')
+  .max(
+    maxLengthPolicies.name,
+    `First name should have at most ${maxLengthPolicies.name} characters`
+  );
+
+export const lastName = z
+  .string({
+    required_error: 'Last name is required',
+    invalid_type_error: 'Last name must be a string',
+  })
+  .min(1, 'Last name is required')
+  .max(
+    maxLengthPolicies.name,
+    `Last name should have at most ${maxLengthPolicies.name} characters`
+  );
+
+export const phoneNumber = z
+  .string({
+    invalid_type_error: 'Phone number must be a string',
+  })
+  .max(50, 'Phone number should have at most 50 characters')
+  .optional();
+
+export const addressField = z
+  .string({
+    invalid_type_error: 'Address field must be a string',
+  })
+  .max(255, 'Address field should have at most 255 characters')
+  .optional();
+
+export const notes = z
+  .string({
+    invalid_type_error: 'Notes must be a string',
+  })
+  .max(1000, 'Notes should have at most 1000 characters')
+  .optional();
