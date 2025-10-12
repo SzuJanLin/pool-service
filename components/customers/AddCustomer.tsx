@@ -3,7 +3,7 @@ import type { Company, Customer } from '@prisma/client';
 import { useFormik } from 'formik';
 import useCustomers from 'hooks/useCustomers';
 import { useTranslation } from 'next-i18next';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Select } from 'react-daisyui';
 import toast from 'react-hot-toast';
 import type { ApiResponse } from 'types';
@@ -15,13 +15,15 @@ interface AddCustomerProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   company: Company;
+  customer?: Customer | null; // Optional: if provided, we're editing
 }
 
 const customerStatuses = ['LEAD', 'ACTIVE', 'INACTIVE', 'LOST'] as const;
 
-const AddCustomer = ({ visible, setVisible, company }: AddCustomerProps) => {
+const AddCustomer = ({ visible, setVisible, company, customer = null }: AddCustomerProps) => {
   const { t } = useTranslation('common');
   const { mutateCustomers } = useCustomers(company.slug);
+  const isEditMode = !!customer;
 
   const formik = useFormik({
     initialValues: {
@@ -49,10 +51,16 @@ const AddCustomer = ({ visible, setVisible, company }: AddCustomerProps) => {
       status: Yup.string().oneOf(customerStatuses).required(),
     }),
     onSubmit: async (values) => {
-      const response = await fetch(`/api/companies/${company.slug}/customers`, {
-        method: 'POST',
+      const url = `/api/companies/${company.slug}/customers`;
+      const method = isEditMode ? 'PATCH' : 'POST';
+      const body = isEditMode 
+        ? JSON.stringify({ customerId: customer?.id, ...values })
+        : JSON.stringify(values);
+
+      const response = await fetch(url, {
+        method,
         headers: defaultHeaders,
-        body: JSON.stringify(values),
+        body,
       });
 
       const json = (await response.json()) as ApiResponse<Customer>;
@@ -65,19 +73,46 @@ const AddCustomer = ({ visible, setVisible, company }: AddCustomerProps) => {
       formik.resetForm();
       mutateCustomers();
       setVisible(false);
-      toast.success(t('customer-created'));
+      toast.success(t(isEditMode ? 'customer-updated' : 'customer-created'));
     },
   });
 
+  // Pre-fill form when editing or reset when adding
+  useEffect(() => {
+    if (visible) {
+      if (customer && isEditMode) {
+        formik.setValues({
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email || '',
+          phone: customer.phone || '',
+          addressStreet: customer.addressStreet || '',
+          addressCity: customer.addressCity || '',
+          addressState: customer.addressState || '',
+          addressZip: customer.addressZip || '',
+          notes: customer.notes || '',
+          status: customer.status as typeof customerStatuses[number],
+        });
+      } else {
+        // Reset form when adding a new customer
+        formik.resetForm();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customer, isEditMode, visible]);
+
   const onClose = () => {
     setVisible(false);
+    formik.resetForm();
   };
 
   return (
     <Modal open={visible} close={onClose}>
       <form onSubmit={formik.handleSubmit} method="POST">
-        <Modal.Header>{t('add-customer')}</Modal.Header>
-        <Modal.Description>{t('add-new-customer-description')}</Modal.Description>
+        <Modal.Header>{t(isEditMode ? 'edit-customer' : 'add-customer')}</Modal.Header>
+        <Modal.Description>
+          {t(isEditMode ? 'edit-customer-description' : 'add-new-customer-description')}
+        </Modal.Description>
         <Modal.Body>
           <div className="flex flex-col gap-4">
             {/* Personal Information */}
@@ -197,7 +232,7 @@ const AddCustomer = ({ visible, setVisible, company }: AddCustomerProps) => {
             size="md"
             disabled={!formik.dirty || !formik.isValid}
           >
-            {t('add-customer')}
+            {t(isEditMode ? 'save-changes' : 'add-customer')}
           </Button>
         </Modal.Footer>
       </form>

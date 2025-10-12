@@ -1,8 +1,10 @@
 import { Error, Loading } from '@/components/shared';
 import { Table } from '@/components/shared/table/Table';
-import { Company } from '@prisma/client';
+import { Company, Customer } from '@prisma/client';
 import useCustomers from 'hooks/useCustomers';
 import { useTranslation } from 'next-i18next';
+import { useState } from 'react';
+import AddCustomer from './AddCustomer';
 
 interface CustomerPaginationProps {
   company: Company;
@@ -11,6 +13,8 @@ interface CustomerPaginationProps {
 const CustomerPagination = ({ company }: CustomerPaginationProps) => {
   const { t } = useTranslation('common');
   const { isLoading, isError, customers } = useCustomers(company.slug);
+  const [editCustomerVisible, setEditCustomerVisible] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   if (isLoading) {
     return <Loading />;
@@ -37,10 +41,11 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
   ];
 
   return (
-    <div className="mt-6">
-      <Table
-        cols={cols}
-        body={customers.map((customer) => {
+    <>
+      <div className="mt-6">
+        <Table
+          cols={cols}
+          body={customers.map((customer) => {
           // Format full name
           const fullName = `${customer.firstName} ${customer.lastName}`;
 
@@ -82,17 +87,24 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
                     color: 'primary',
                     text: t('edit'),
                     onClick: () => {
-                      // TODO: Implement edit functionality
-                      console.log('Edit customer:', customer.id);
+                      setSelectedCustomer(customer);
+                      setEditCustomerVisible(true);
                     },
                   },
                 ],
               },
             ],
           };
-        })}
+          })}
+        />
+      </div>
+      <AddCustomer
+        visible={editCustomerVisible}
+        setVisible={setEditCustomerVisible}
+        company={company}
+        customer={selectedCustomer}
       />
-    </div>
+    </>
   );
 };
 
