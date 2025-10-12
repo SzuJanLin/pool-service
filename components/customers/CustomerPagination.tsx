@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next';
 import { useState } from 'react';
 import React from 'react';
 import { Button } from 'react-daisyui';
-import AddCustomer from './AddCustomer';
+import { useRouter } from 'next/router';
 
 interface CustomerPaginationProps {
   company: Company;
@@ -14,6 +14,7 @@ interface CustomerPaginationProps {
 
 const CustomerPagination = ({ company }: CustomerPaginationProps) => {
   const { t } = useTranslation('common');
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(13);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,8 +26,6 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
     pageSize,
     debouncedSearch
   );
-  const [editCustomerVisible, setEditCustomerVisible] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   // Debounce search input
   React.useEffect(() => {
@@ -39,13 +38,7 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
   }, [searchQuery]);
 
   const handleEditCustomer = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setEditCustomerVisible(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setEditCustomerVisible(false);
-    setSelectedCustomer(null);
+    router.push(`/companies/${company.slug}/customers/${customer.id}`);
   };
 
   const hasSearchQuery = debouncedSearch.length > 0;
@@ -204,13 +197,6 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
           </div>
         </>
       )}
-      
-      <AddCustomer
-        visible={editCustomerVisible}
-        setVisible={handleCloseEditModal}
-        company={company}
-        customer={selectedCustomer}
-      />
     </div>
   );
 };

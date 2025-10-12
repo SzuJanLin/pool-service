@@ -8,20 +8,19 @@ import { Button, Select } from 'react-daisyui';
 import toast from 'react-hot-toast';
 import type { ApiResponse } from 'types';
 import * as Yup from 'yup';
-import Modal from '../shared/Modal';
 import { InputWithLabel } from '../shared';
+import { useRouter } from 'next/router';
 
 interface AddCustomerProps {
-  visible: boolean;
-  setVisible: (visible: boolean) => void;
   company: Company;
   customer?: Customer | null; // Optional: if provided, we're editing
 }
 
 const customerStatuses = ['LEAD', 'ACTIVE', 'INACTIVE', 'LOST'] as const;
 
-const AddCustomer = ({ visible, setVisible, company, customer = null }: AddCustomerProps) => {
+const CreateCustomer = ({ company, customer = null }: AddCustomerProps) => {
   const { t } = useTranslation('common');
+  const router = useRouter();
   const { mutateCustomers } = useCustomers(company.slug);
   const isEditMode = !!customer;
 
@@ -72,48 +71,44 @@ const AddCustomer = ({ visible, setVisible, company, customer = null }: AddCusto
 
       formik.resetForm();
       mutateCustomers();
-      setVisible(false);
       toast.success(t(isEditMode ? 'customer-updated' : 'customer-created'));
+      router.push(`/companies/${company.slug}/customers`);
     },
   });
 
-  // Pre-fill form when editing or reset when adding
+  // Pre-fill form when editing
   useEffect(() => {
-    if (visible) {
-      if (customer && isEditMode) {
-        formik.setValues({
-          firstName: customer.firstName,
-          lastName: customer.lastName,
-          email: customer.email || '',
-          phone: customer.phone || '',
-          addressStreet: customer.addressStreet || '',
-          addressCity: customer.addressCity || '',
-          addressState: customer.addressState || '',
-          addressZip: customer.addressZip || '',
-          notes: customer.notes || '',
-          status: customer.status as typeof customerStatuses[number],
-        });
-      } else {
-        // Reset form when adding a new customer
-        formik.resetForm();
-      }
+    if (customer && isEditMode) {
+      formik.setValues({
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email || '',
+        phone: customer.phone || '',
+        addressStreet: customer.addressStreet || '',
+        addressCity: customer.addressCity || '',
+        addressState: customer.addressState || '',
+        addressZip: customer.addressZip || '',
+        notes: customer.notes || '',
+        status: customer.status as typeof customerStatuses[number],
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customer, isEditMode, visible]);
+  }, [customer, isEditMode]);
 
-  const onClose = () => {
-    setVisible(false);
-    formik.resetForm();
+  const handleCancel = () => {
+    router.push(`/companies/${company.slug}/customers`);
   };
 
   return (
-    <Modal open={visible} close={onClose}>
-      <form onSubmit={formik.handleSubmit} method="POST">
-        <Modal.Header>{t(isEditMode ? 'edit-customer' : 'add-customer')}</Modal.Header>
-        <Modal.Description>
-          {t(isEditMode ? 'edit-customer-description' : 'add-new-customer-description')}
-        </Modal.Description>
-        <Modal.Body>
+    <div className="w-full max-w-4xl">
+      <form onSubmit={formik.handleSubmit} method="POST" className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold">{t(isEditMode ? 'edit-customer' : 'add-customer')}</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            {t(isEditMode ? 'edit-customer-description' : 'add-new-customer-description')}
+          </p>
+        </div>
+        <div className="space-y-6">
           <div className="flex flex-col gap-4">
             {/* Personal Information */}
             <div className="grid grid-cols-2 gap-4">
@@ -220,10 +215,10 @@ const AddCustomer = ({ visible, setVisible, company, customer = null }: AddCusto
               />
             </div>
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button type="button" variant="outline" onClick={onClose} size="md">
-            {t('close')}
+        </div>
+        <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+          <Button type="button" variant="outline" onClick={handleCancel} size="md">
+            {t('cancel')}
           </Button>
           <Button
             type="submit"
@@ -234,10 +229,10 @@ const AddCustomer = ({ visible, setVisible, company, customer = null }: AddCusto
           >
             {t(isEditMode ? 'save-changes' : 'add-customer')}
           </Button>
-        </Modal.Footer>
+        </div>
       </form>
-    </Modal>
+    </div>
   );
 };
 
-export default AddCustomer;
+export default CreateCustomer;
