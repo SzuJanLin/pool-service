@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { Customer, CustomerStatus, Prisma } from '@prisma/client';
+import { Customer, Prisma } from '@prisma/client';
 
 export const createCustomer = async (
   data: Prisma.CustomerCreateInput
@@ -14,16 +14,36 @@ export const getCustomers = async (
   options?: {
     page?: number;
     pageSize?: number;
+    search?: string;
   }
 ): Promise<{ customers: Customer[]; totalCount: number }> => {
-  const { page = 1, pageSize = 10 } = options || {};
+  const { page = 1, pageSize = 10, search = '' } = options || {};
   const skip = (page - 1) * pageSize;
+
+  // Build search conditions
+  const searchConditions = search
+    ? {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' as const } },
+          { lastName: { contains: search, mode: 'insensitive' as const } },
+          { email: { contains: search, mode: 'insensitive' as const } },
+          { phone: { contains: search, mode: 'insensitive' as const } },
+          { addressStreet: { contains: search, mode: 'insensitive' as const } },
+          { addressCity: { contains: search, mode: 'insensitive' as const } },
+          { addressState: { contains: search, mode: 'insensitive' as const } },
+          { addressZip: { contains: search, mode: 'insensitive' as const } },
+        ],
+      }
+    : {};
+
+  const whereClause = {
+    companyId,
+    ...searchConditions,
+  };
 
   const [customers, totalCount] = await Promise.all([
     prisma.customer.findMany({
-      where: {
-        companyId,
-      },
+      where: whereClause,
       orderBy: {
         createdAt: 'desc',
       },
@@ -31,9 +51,7 @@ export const getCustomers = async (
       take: pageSize,
     }),
     prisma.customer.count({
-      where: {
-        companyId,
-      },
+      where: whereClause,
     }),
   ]);
 
@@ -78,6 +96,15 @@ export const deleteCustomer = async (
   id: string,
   companyId: string
 ): Promise<Customer> => {
+  // First verify the customer belongs to the company
+  const customer = await prisma.customer.findFirst({
+    where: { id, companyId },
+  });
+
+  if (!customer) {
+    throw new Error('Customer not found');
+  }
+
   return await prisma.customer.delete({
     where: {
       id,

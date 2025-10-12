@@ -55,10 +55,12 @@ const handleGET = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const page = req.query.page ? parseInt(req.query.page as string) : 1;
   const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 10;
+  const search = req.query.search ? (req.query.search as string) : '';
 
   const { customers, totalCount } = await getCustomers(companyMember.company.id, {
     page,
     pageSize,
+    search,
   });
 
   // recordMetric('customer.fetched');

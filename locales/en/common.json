@@ -154,6 +154,8 @@
   "results": "results",
   "previous": "Previous",
   "next": "Next",
+  "search-customers": "Search customers by name, email, phone, or address...",
+  "no-search-results": "No customers found matching your search.",
   "new-company": "New Company",
   "profile": "Profile",
   "company-not-found": "Company not found",

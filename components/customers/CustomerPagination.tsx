@@ -4,6 +4,7 @@ import { Company, Customer } from '@prisma/client';
 import useCustomers from 'hooks/useCustomers';
 import { useTranslation } from 'next-i18next';
 import { useState } from 'react';
+import React from 'react';
 import { Button } from 'react-daisyui';
 import AddCustomer from './AddCustomer';
 
@@ -15,14 +16,28 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
   const { t } = useTranslation('common');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(13);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
   const { isLoading, isError, customers, pagination } = useCustomers(
     company.slug,
     currentPage,
-    pageSize
+    pageSize,
+    debouncedSearch
   );
   const [editCustomerVisible, setEditCustomerVisible] = useState(false);
   const [addCustomerVisible, setAddCustomerVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  // Debounce search input
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1); // Reset to page 1 on search
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleAddCustomer = () => {
     setSelectedCustomer(null);
@@ -42,21 +57,7 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
     setCurrentPage(1);
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  if (isError) {
-    return <Error message={isError.message} />;
-  }
-
-  if (!customers || customers.length === 0) {
-    return (
-      <div className="text-center py-10 text-gray-500">
-        {t('no-customers-yet')}
-      </div>
-    );
-  }
+  const hasSearchQuery = debouncedSearch.length > 0;
 
   const cols = [
     t('name'),
@@ -134,15 +135,35 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
 
   return (
     <div className="w-full">
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-4">
+        <div className="w-full sm:w-96">
+          <input
+            type="text"
+            placeholder={t('search-customers')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input input-bordered w-full"
+          />
+        </div>
         <Button color="primary" size="md" onClick={handleAddCustomer}>
           {t('add-customer')}
         </Button>
       </div>
-      <div className="w-full">
-        <Table
-          cols={cols}
-          body={customers.map((customer) => {
+
+      {isLoading ? (
+        <Loading />
+      ) : isError ? (
+        <Error message={isError.message} />
+      ) : !customers || customers.length === 0 ? (
+        <div className="text-center py-10 text-gray-500">
+          {hasSearchQuery ? t('no-search-results') : t('no-customers-yet')}
+        </div>
+      ) : (
+        <>
+          <div className="w-full">
+            <Table
+              cols={cols}
+              body={customers.map((customer) => {
           // Format full name
           const fullName = `${customer.firstName} ${customer.lastName}`;
 
@@ -189,10 +210,13 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
               },
             ],
           };
-          })}
-        />
-        {renderPagination()}
-      </div>
+              })}
+            />
+            {renderPagination()}
+          </div>
+        </>
+      )}
+      
       <AddCustomer
         visible={editCustomerVisible || addCustomerVisible}
         setVisible={handleCloseCustomerModal}

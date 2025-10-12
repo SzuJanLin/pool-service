@@ -15,8 +15,14 @@ interface CustomersResponse {
   pagination?: PaginationInfo;
 }
 
-const useCustomers = (slug: string, page: number = 1, pageSize: number = 10) => {
-  const url = `/api/companies/${slug}/customers?page=${page}&pageSize=${pageSize}`;
+const useCustomers = (
+  slug: string,
+  page: number = 1,
+  pageSize: number = 10,
+  search: string = ''
+) => {
+  const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+  const url = `/api/companies/${slug}/customers?page=${page}&pageSize=${pageSize}${searchParam}`;
 
   const { data, error, isLoading } = useSWR<CustomersResponse>(
     url,
