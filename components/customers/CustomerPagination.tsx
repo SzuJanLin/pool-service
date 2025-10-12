@@ -133,13 +133,13 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
   };
 
   return (
-    <>
+    <div className="w-full">
       <div className="flex justify-end mb-4">
         <Button color="primary" size="md" onClick={handleAddCustomer}>
           {t('add-customer')}
         </Button>
       </div>
-      <div className="mt-6">
+      <div className="w-full">
         <Table
           cols={cols}
           body={customers.map((customer) => {
@@ -199,7 +199,7 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
         company={company}
         customer={selectedCustomer}
       />
-    </>
+    </div>
   );
 };
 

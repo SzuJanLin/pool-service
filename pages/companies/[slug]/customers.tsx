@@ -23,8 +23,8 @@ const Customers: NextPageWithLayout = () => {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center">
+    <div className="w-full">
+      <div className="flex justify-between items-center mb-6">
         <div className="space-y-3">
           <h2 className="text-xl font-medium leading-none tracking-tight">
             {t('customers')}
