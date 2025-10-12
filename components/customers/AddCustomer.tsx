@@ -1,6 +1,7 @@
 import { defaultHeaders, maxLengthPolicies } from '@/lib/common';
 import type { Company, Customer } from '@prisma/client';
 import { useFormik } from 'formik';
+import useCustomers from 'hooks/useCustomers';
 import { useTranslation } from 'next-i18next';
 import React from 'react';
 import { Button, Select } from 'react-daisyui';
@@ -20,6 +21,7 @@ const customerStatuses = ['LEAD', 'ACTIVE', 'INACTIVE', 'LOST'] as const;
 
 const AddCustomer = ({ visible, setVisible, company }: AddCustomerProps) => {
   const { t } = useTranslation('common');
+  const { mutateCustomers } = useCustomers(company.slug);
 
   const formik = useFormik({
     initialValues: {
@@ -61,6 +63,7 @@ const AddCustomer = ({ visible, setVisible, company }: AddCustomerProps) => {
       }
 
       formik.resetForm();
+      mutateCustomers();
       setVisible(false);
       toast.success(t('customer-created'));
     },

@@ -143,6 +143,8 @@
   "customer-status-active": "Active",
   "customer-status-inactive": "Inactive",
   "customer-status-lost": "Lost",
+  "customer-address": "Address",
+  "no-customers-yet": "No customers yet. Click the button above to add your first customer.",
   "new-company": "New Company",
   "profile": "Profile",
   "company-not-found": "Company not found",

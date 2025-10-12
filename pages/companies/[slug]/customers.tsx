@@ -40,7 +40,7 @@ const Customers: NextPageWithLayout = () => {
       </div>
 
 
-      <CustomerPagination />
+      <CustomerPagination company={company} />
       <AddCustomer visible={addCustomerVisible} setVisible={setAddCustomerVisible} company={company} />
     </div>
  
