@@ -14,11 +14,13 @@ import { useRouter } from 'next/router';
 interface AddCustomerProps {
   company: Company;
   customer?: Customer | null; // Optional: if provided, we're editing
+  onSaveSuccess?: () => void; // Optional: callback to execute after successful save
+  onCancel?: () => void; // Optional: callback to execute when canceling
 }
 
 const customerStatuses = ['LEAD', 'ACTIVE', 'INACTIVE', 'LOST'] as const;
 
-const CreateCustomer = ({ company, customer = null }: AddCustomerProps) => {
+const CreateCustomer = ({ company, customer = null, onSaveSuccess, onCancel }: AddCustomerProps) => {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { mutateCustomers } = useCustomers(company.slug);
@@ -72,7 +74,13 @@ const CreateCustomer = ({ company, customer = null }: AddCustomerProps) => {
       formik.resetForm();
       mutateCustomers();
       toast.success(t(isEditMode ? 'customer-updated' : 'customer-created'));
-      router.push(`/companies/${company.slug}/customers`);
+      
+      // Use custom callback if provided, otherwise default redirect
+      if (onSaveSuccess) {
+        onSaveSuccess();
+      } else {
+        router.push(`/companies/${company.slug}/customers`);
+      }
     },
   });
 
@@ -96,7 +104,11 @@ const CreateCustomer = ({ company, customer = null }: AddCustomerProps) => {
   }, [customer, isEditMode]);
 
   const handleCancel = () => {
-    router.push(`/companies/${company.slug}/customers`);
+    if (onCancel) {
+      onCancel();
+    } else {
+      router.push(`/companies/${company.slug}/customers`);
+    }
   };
 
   return (
