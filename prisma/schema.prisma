@@ -192,6 +192,13 @@ enum CustomerStatus {
   LOST
 }
 
+enum ChemicalType {
+  CHLORINE
+  BROMINE
+  SALT
+  OTHER
+}
+
 model Customer {
   id         String   @id @default(uuid())
   companyId     String
@@ -208,9 +215,25 @@ model Customer {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now())
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pools   Pool[]
   @@index([companyId])
 }
 
+model Pool {
+  id               String        @id @default(uuid())
+  customerId       String
+  name             String
+  gallons          Int?
+  chemicalType     ChemicalType?
+  baselinePressure Float?
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now())
+  
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@index([customerId])
+}
 model jackson_store {
   key        String    @id(map: "_jackson_store_key") @db.VarChar(1500)
   value      String

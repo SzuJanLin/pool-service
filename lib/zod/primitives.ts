@@ -311,4 +311,36 @@ export const notes = z
     invalid_type_error: 'Notes must be a string',
   })
   .max(1000, 'Notes should have at most 1000 characters')
-  .optional();
+  .optional()
+  .nullable();
+
+export const poolId = z
+  .string({
+    required_error: 'Pool id is required',
+    invalid_type_error: 'Pool id must be a string',
+  })
+  .min(1, 'Pool id is required');
+
+export const poolName = z
+  .string({
+    required_error: 'Pool name is required',
+    invalid_type_error: 'Pool name must be a string',
+  })
+  .min(1, 'Pool name is required')
+  .max(255, 'Pool name should have at most 255 characters');
+
+export const gallons = z
+  .number({
+    invalid_type_error: 'Gallons must be a number',
+  })
+  .positive('Gallons must be a positive number')
+  .optional()
+  .nullable();
+
+export const baselinePressure = z
+  .number({
+    invalid_type_error: 'Baseline pressure must be a number',
+  })
+  .positive('Baseline pressure must be a positive number')
+  .optional()
+  .nullable();

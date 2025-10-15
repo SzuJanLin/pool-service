@@ -31,8 +31,12 @@ import {
   phoneNumber,
   addressField,
   notes,
+  poolId,
+  poolName,
+  gallons,
+  baselinePressure,
 } from './primitives';
-import { CustomerStatus } from '@prisma/client';
+import { CustomerStatus, ChemicalType } from '@prisma/client';
 
 export const createApiKeySchema = z.object({
   name: name(50),
@@ -208,4 +212,25 @@ export const updateCustomerSchema = z.object({
 
 export const deleteCustomerSchema = z.object({
   customerId,
+});
+
+export const createPoolSchema = z.object({
+  name: poolName,
+  gallons,
+  chemicalType: z.nativeEnum(ChemicalType).optional().nullable(),
+  baselinePressure,
+  notes,
+});
+
+export const updatePoolSchema = z.object({
+  poolId,
+  name: poolName.optional(),
+  gallons,
+  chemicalType: z.nativeEnum(ChemicalType).optional().nullable(),
+  baselinePressure,
+  notes,
+});
+
+export const deletePoolSchema = z.object({
+  poolId,
 });

@@ -12,6 +12,9 @@ import fetcher from '@/lib/fetcher';
 import Profile from '@/components/customers/details/Profile';
 import { useState } from 'react';
 import classNames from 'classnames';
+import {PlusCircleIcon} from '@heroicons/react/24/outline';
+import Modal from '@/components/shared/Modal';
+import AddPool from '@/components/customers/details/pool/AddPool';
 
 const CustomerDetails: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
@@ -19,6 +22,7 @@ const CustomerDetails: NextPageWithLayout = () => {
   const { slug, id } = router.query;
   const { isLoading: companyLoading, isError: companyError, company } = useCompany();
   const [activeTab, setActiveTab] = useState('profile');
+  const [showAddPoolModal, setShowAddPoolModal] = useState(false);
   // Fetch the specific customer
   const { data: customerData, error: customerError, isLoading: customerLoading, mutate: mutateCustomer } = useSWR<ApiResponse<Customer>>(
     company && id ? `/api/companies/${slug}/customers/${id}` : null,
@@ -90,6 +94,17 @@ const CustomerDetails: NextPageWithLayout = () => {
     {t('route')}
   </button>
   <button
+    onClick={() => setActiveTab('photos')}
+    className={classNames(
+      'inline-flex items-center border-b-2 py-2 md-py-4 mr-5 text-sm font-medium',
+      activeTab === 'photos' 
+        ? 'border-gray-900 text-gray-700 dark:text-gray-100' 
+        : 'border-transparent text-gray-500 hover:border-gray-300  hover:text-gray-700 hover:dark:text-gray-100'
+    )}
+  >
+    {t('photos')}
+  </button>
+  <button
     onClick={() => setActiveTab('pool')}
     className={classNames(
       'inline-flex items-center border-b-2 py-2 md-py-4 mr-5 text-sm font-medium',
@@ -100,16 +115,11 @@ const CustomerDetails: NextPageWithLayout = () => {
   >
     {t('pool')}
   </button>
-  <button
-    onClick={() => setActiveTab('photos')}
-    className={classNames(
-      'inline-flex items-center border-b-2 py-2 md-py-4 mr-5 text-sm font-medium',
-      activeTab === 'photos' 
-        ? 'border-gray-900 text-gray-700 dark:text-gray-100' 
-        : 'border-transparent text-gray-500 hover:border-gray-300  hover:text-gray-700 hover:dark:text-gray-100'
-    )}
-  >
-    {t('photos')}
+  <button 
+    onClick={() => setShowAddPoolModal(true)}
+    className='inline-flex items-center border-b-2 py-2 md-py-4 mr-5 text-sm font-medium border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:dark:text-gray-100'>
+    <PlusCircleIcon className='w-5 h-5 mr-1' />
+    {t('add-pool')}
   </button>
 </nav>
 
@@ -125,6 +135,23 @@ const CustomerDetails: NextPageWithLayout = () => {
 //   <ServicesSection customer={customerData.data} />
 <div>Pool</div>
 )}
+
+{/* Add Pool Modal */}
+<Modal open={showAddPoolModal} close={() => setShowAddPoolModal(false)}>
+  <Modal.Header>{t('add-pool')}</Modal.Header>
+  <Modal.Description>{t('add-new-pool-description')}</Modal.Description>
+  <Modal.Body>
+    <AddPool
+      company={company}
+      customer={customerData.data}
+      onSuccess={() => {
+        setShowAddPoolModal(false);
+        mutateCustomer(); // Refresh customer data
+      }}
+      onCancel={() => setShowAddPoolModal(false)}
+    />
+  </Modal.Body>
+</Modal>
     </div>
   );
 };
