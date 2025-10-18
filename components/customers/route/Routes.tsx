@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import Modal from '../../shared/Modal';
 import AddRoute from './AddRoute';
+import { defaultHeaders } from '@/lib/common';
+import toast from 'react-hot-toast';
 import type { CustomerWithPoolsAndRoutes } from 'models/customer';
 
 interface RoutesProps {
@@ -19,9 +21,40 @@ const RoutesComponent = ({ customer, technicians, company, onRouteAdded }: Route
   const allRoutes = customer.pools.flatMap(pool => 
     pool.routes.map(route => ({
       ...route,
-      poolName: pool.name
+      poolName: pool.name,
+      poolId: pool.id,
     }))
   );
+
+  const [editingRoute, setEditingRoute] = useState<any | null>(null);
+
+  const handleEdit = (route: any) => {
+    setEditingRoute(route);
+    setShowAddRouteModal(true);
+  };
+
+  const handleDelete = async (route: any) => {
+    if (!confirm('Are you sure you want to delete this route?')) return;
+    try {
+      const url = `/api/companies/${company.slug}/customers/${customer.id}/routes?poolId=${encodeURIComponent(
+        route.poolId
+      )}&routeId=${encodeURIComponent(route.id)}`;
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: defaultHeaders,
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error?.message || 'Failed to delete route');
+        return;
+      }
+      toast.success('Route deleted');
+      if (onRouteAdded) onRouteAdded();
+    } catch (err) {
+      console.error('delete route error', err);
+      toast.error('Failed to delete route');
+    }
+  };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -82,7 +115,7 @@ const RoutesComponent = ({ customer, technicians, company, onRouteAdded }: Route
         </div>
         
         {/* Add Route Modal */}
-        <Modal open={showAddRouteModal} close={() => setShowAddRouteModal(false)}>
+          <Modal open={showAddRouteModal} close={() => { setShowAddRouteModal(false); setEditingRoute(null); }}>
           <Modal.Header>Add Route</Modal.Header>
           <Modal.Description>Create a new service route for this customer&apos;s pools.</Modal.Description>
           <Modal.Body>
@@ -188,10 +221,10 @@ const RoutesComponent = ({ customer, technicians, company, onRouteAdded }: Route
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-indigo-600 hover:text-indigo-900 mr-3">
+                    <button onClick={() => handleEdit(route)} className="text-indigo-600 hover:text-indigo-900 mr-3">
                       Edit
                     </button>
-                    <button className="text-red-600 hover:text-red-900">
+                    <button onClick={() => handleDelete(route)} className="text-red-600 hover:text-red-900">
                       Delete
                     </button>
                   </td>
@@ -211,13 +244,15 @@ const RoutesComponent = ({ customer, technicians, company, onRouteAdded }: Route
             company={company}
             customer={customer}
             technicians={technicians}
+            route={editingRoute}
             onSuccess={() => {
               setShowAddRouteModal(false);
+              setEditingRoute(null);
               if (onRouteAdded) {
                 onRouteAdded();
               }
             }}
-            onCancel={() => setShowAddRouteModal(false)}
+            onCancel={() => { setShowAddRouteModal(false); setEditingRoute(null); }}
           />
         </Modal.Body>
       </Modal>

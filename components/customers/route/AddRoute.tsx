@@ -13,6 +13,7 @@ interface AddRouteProps {
   company: Company;
   customer: CustomerWithPoolsAndRoutes;
   technicians: any;
+  route?: any; // optional route for editing
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -34,22 +35,23 @@ const frequencyOptions = [
   { value: 'CUSTOM', label: 'Custom' },
 ];
 
-const AddRoute = ({ company, customer, technicians, onSuccess, onCancel }: AddRouteProps) => {
+const AddRoute = ({ company, customer, technicians, route, onSuccess, onCancel }: AddRouteProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      poolId: '',
-      techId: '',
-      dayOfWeek: 'MONDAY',
-      frequency: 'WEEKLY',
-      startOn: '',
-      stopAfter: '',
-      skipWeeks: 0,
-      anchorDate: '',
-      weekOffset: 0,
-      skipWeekNumbers: '',
-      active: true,
+      poolId: route?.poolId ?? '',
+      techId: route?.techId ?? (route?.tech?.id ?? ''),
+      dayOfWeek: route?.dayOfWeek ?? 'MONDAY',
+      frequency: route?.frequency ?? 'WEEKLY',
+      startOn: route?.startOn ? new Date(route.startOn).toISOString().slice(0,10) : '',
+      stopAfter: route?.stopAfter ? new Date(route.stopAfter).toISOString().slice(0,10) : '',
+      skipWeeks: route?.skipWeeks ?? 0,
+      anchorDate: route?.anchorDate ? new Date(route.anchorDate).toISOString().slice(0,10) : '',
+      weekOffset: route?.weekOffset ?? 0,
+      skipWeekNumbers: route?.skipWeekNumbers ? route.skipWeekNumbers.join(',') : '',
+      active: route?.active ?? true,
     },
     validationSchema: Yup.object().shape({
       poolId: Yup.string().required('Pool is required'),
@@ -68,7 +70,10 @@ const AddRoute = ({ company, customer, technicians, onSuccess, onCancel }: AddRo
       setIsSubmitting(true);
       
       try {
-        const url = `/api/companies/${company.slug}/customers/${customer.id}/routes`;
+        const isEdit = !!route;
+        const url = isEdit
+          ? `/api/companies/${company.slug}/customers/${customer.id}/routes?poolId=${encodeURIComponent(values.poolId)}&routeId=${encodeURIComponent(route.id)}`
+          : `/api/companies/${company.slug}/customers/${customer.id}/routes`;
         
         // Format the data
         const body = JSON.stringify({
@@ -88,7 +93,7 @@ const AddRoute = ({ company, customer, technicians, onSuccess, onCancel }: AddRo
         });
 
         const response = await fetch(url, {
-          method: 'POST',
+          method: isEdit ? 'PATCH' : 'POST',
           headers: defaultHeaders,
           body,
         });
@@ -336,7 +341,7 @@ const AddRoute = ({ company, customer, technicians, onSuccess, onCancel }: AddRo
           disabled={isSubmitting || !formik.isValid || customer.pools.length === 0}
           loading={isSubmitting}
         >
-          Create Route
+          {route ? 'Update Route' : 'Create Route'}
         </Button>
       </div>
     </div>
