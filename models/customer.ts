@@ -1,5 +1,13 @@
 import { prisma } from '@/lib/prisma';
-import { Customer, Prisma } from '@prisma/client';
+import { Customer, Prisma, Pool, Route, User } from '@prisma/client';
+
+export type CustomerWithPoolsAndRoutes = Customer & {
+  pools: (Pool & {
+    routes: (Route & {
+      tech: User | null;
+    })[];
+  })[];
+};
 
 export const createCustomer = async (
   data: Prisma.CustomerCreateInput
@@ -61,11 +69,22 @@ export const getCustomers = async (
 export const getCustomer = async (
   id: string,
   companyId: string
-): Promise<Customer | null> => {
+): Promise<CustomerWithPoolsAndRoutes | null> => {
   return await prisma.customer.findFirst({
     where: {
       id,
       companyId,
+    },
+    include: {
+      pools: {
+        include: {
+          routes: {
+            include: {
+              tech: true,
+            },
+          },
+        },
+      },
     },
   });
 };

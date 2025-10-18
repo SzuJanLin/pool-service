@@ -155,6 +155,8 @@ async function init() {
   const companies = await seedCompanies();
   await seedCompanyMembers(users, companies);
   await seedInvitations(companies, users);
+
+  
 }
 
 init();

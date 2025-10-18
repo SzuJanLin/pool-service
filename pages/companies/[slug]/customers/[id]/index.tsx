@@ -7,7 +7,8 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import type { ApiResponse } from 'types';
-import type { Customer } from '@prisma/client';
+import type { User } from '@prisma/client';
+import type { CustomerWithPoolsAndRoutes } from 'models/customer';
 import fetcher from '@/lib/fetcher';
 import Profile from '@/components/customers/details/Profile';
 import { useState } from 'react';
@@ -15,6 +16,8 @@ import classNames from 'classnames';
 import {PlusCircleIcon} from '@heroicons/react/24/outline';
 import Modal from '@/components/shared/Modal';
 import AddPool from '@/components/customers/details/pool/AddPool';
+import PoolComponent from '@/components/customers/details/Pool';
+import RoutesComponent from '@/components/customers/route/Routes';
 
 const CustomerDetails: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
@@ -23,8 +26,15 @@ const CustomerDetails: NextPageWithLayout = () => {
   const { isLoading: companyLoading, isError: companyError, company } = useCompany();
   const [activeTab, setActiveTab] = useState('profile');
   const [showAddPoolModal, setShowAddPoolModal] = useState(false);
+  
+  // Fetch technicians for the company
+  const { data: techniciansData } = useSWR<ApiResponse<User[]>>(
+    company ? `/api/companies/${slug}/members` : null,
+    fetcher
+  );
+  
   // Fetch the specific customer
-  const { data: customerData, error: customerError, isLoading: customerLoading, mutate: mutateCustomer } = useSWR<ApiResponse<Customer>>(
+  const { data: customerData, error: customerError, isLoading: customerLoading, mutate: mutateCustomer } = useSWR<ApiResponse<CustomerWithPoolsAndRoutes>>(
     company && id ? `/api/companies/${slug}/customers/${id}` : null,
     fetcher
   );
@@ -131,9 +141,16 @@ const CustomerDetails: NextPageWithLayout = () => {
     onSaveSuccess={handleSaveSuccess}
   />
 )}
+{activeTab === 'route' && (
+<RoutesComponent 
+  customer={customerData.data} 
+  technicians={techniciansData?.data || []}
+  company={company}
+  onRouteAdded={handleSaveSuccess}
+/>
+)}
 {activeTab === 'pool' && (
-//   <ServicesSection customer={customerData.data} />
-<div>Pool</div>
+<PoolComponent customer={customerData.data} />
 )}
 
 {/* Add Pool Modal */}

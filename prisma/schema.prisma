@@ -67,6 +67,7 @@ model User {
   accounts    Account[]
   sessions    Session[]
   invitations Invitation[]
+  routes      Route[]
 }
 
 model Company {
@@ -231,8 +232,50 @@ model Pool {
   updatedAt        DateTime      @default(now())
   
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  routes   Route[]
   
   @@index([customerId])
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum Frequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+model Route {
+  id               String      @id @default(uuid())
+  poolId           String
+  techId           String?
+  dayOfWeek        DayOfWeek
+  frequency        Frequency
+  startOn          DateTime
+  stopAfter        DateTime?
+  skipWeeks        Int         @default(0)
+  anchorDate       DateTime?
+  weekOffset       Int         @default(0)
+  skipWeekNumbers  Int[]       @default([])
+  active           Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @default(now())
+  
+  pool Pool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  tech User? @relation(fields: [techId], references: [id], onDelete: SetNull)
+  
+  @@index([poolId])
+  @@index([techId])
+  @@index([active])
 }
 model jackson_store {
   key        String    @id(map: "_jackson_store_key") @db.VarChar(1500)
