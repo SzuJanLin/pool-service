@@ -15,6 +15,19 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'files.stripe.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'pool-service.886fddf31c1b7ac4bb4a2b280712582a.r2.cloudflarestorage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.r2.cloudflarestorage.com',
+      },
+      // Allow any Cloudflare R2 domain
+      {
+        protocol: 'https',
+        hostname: '*.cloudflarestorage.com',
+      },
     ],
   },
   i18n,

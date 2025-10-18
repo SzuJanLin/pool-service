@@ -18,6 +18,7 @@ import Modal from '@/components/shared/Modal';
 import AddPool from '@/components/customers/details/pool/AddPool';
 import PoolComponent from '@/components/customers/details/Pool';
 import RoutesComponent from '@/components/customers/route/Routes';
+import PhotosComponent from '@/components/customers/photos/PhotosComponent';
 
 const CustomerDetails: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
@@ -148,6 +149,9 @@ const CustomerDetails: NextPageWithLayout = () => {
   company={company}
   onRouteAdded={handleSaveSuccess}
 />
+)}
+{activeTab === 'photos' && (
+<PhotosComponent companySlug={company.slug as string} customerId={customerData.data.id as string} />
 )}
 {activeTab === 'pool' && (
 <PoolComponent customer={customerData.data} />

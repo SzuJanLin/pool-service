@@ -102,8 +102,8 @@ const env = {
       process.env.FEATURE_COMPANY_PAYMENTS === 'false'
         ? false
         : Boolean(
-            process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET
-          ),
+          process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET
+        ),
     deleteCompany: process.env.FEATURE_COMPANY_DELETION !== 'false',
   },
 
@@ -120,6 +120,15 @@ const env = {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   },
+
+  // Replace the aws section in lib/env.ts with:
+  r2: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    bucket: process.env.R2_BUCKET_NAME,
+    endpoint: process.env.R2_ENDPOINT_URL, // This will be something like https://your-account-id.r2.cloudflarestorage.com
+    publicUrl: process.env.R2_PUBLIC_URL, // Optional: for direct public access
+  }
 };
 
 export default env;
