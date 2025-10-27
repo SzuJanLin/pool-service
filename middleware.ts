@@ -65,6 +65,8 @@ const unAuthenticatedRoutes = [
   '/api/invitations/*',
   '/api/webhooks/stripe',
   '/api/webhooks/dsync',
+  '/api/v1/auth/mobile-login', // Mobile login endpoint
+  '/api/v1/auth/refresh', // Mobile token refresh endpoint
   '/auth/**',
   '/invitations/*',
   '/terms-condition',
