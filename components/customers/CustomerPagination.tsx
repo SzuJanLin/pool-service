@@ -164,6 +164,7 @@ const CustomerPagination = ({ company }: CustomerPaginationProps) => {
                 wrap: true,
                 text: fullName,
                 minWidth: 150,
+                onClick: () => handleEditCustomer(customer),
               },
               {
                 wrap: true,

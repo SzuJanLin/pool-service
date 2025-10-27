@@ -12,6 +12,7 @@ interface TableBodyCell {
   wrap?: boolean;
   text?: string;
   minWidth?: number;
+  onClick?: () => void;
   buttons?: {
     text: string;
     color?: string;
@@ -70,10 +71,11 @@ export const TableBody = ({
               return (
                 <td
                   key={row.id + '-td-' + index}
-                  className={`${cell.wrap ? tdClassWrap : tdClass}`}
+                  className={`${cell.wrap ? tdClassWrap : tdClass} ${cell.onClick ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-blue-600 hover:text-blue-800' : ''}`}
                   style={
                     cell.minWidth ? { minWidth: `${cell.minWidth}px` } : {}
                   }
+                  onClick={cell.onClick}
                 >
                   {!cell.buttons || cell.buttons?.length === 0 ? null : (
                     <div className="flex space-x-2">
