@@ -68,6 +68,10 @@ model User {
   sessions    Session[]
   invitations Invitation[]
   routes      Route[]
+  serviceHistory ServiceHistory[] @relation("ServiceTechnician")
+  uploadedPhotos ServicePhoto[]
+  createdServices ServiceHistory[] @relation("ServiceCreatedBy")
+  updatedServices ServiceHistory[] @relation("ServiceUpdatedBy")
 }
 
 model Company {
@@ -84,6 +88,9 @@ model Company {
   invitations     Invitation[]
   apiKeys         ApiKey[]
   customers       Customer[]
+  checklistTemplates ChecklistTemplate[]
+  serviceHistory  ServiceHistory[]
+  
   @@index([billingId])
 }
 
@@ -272,11 +279,209 @@ model Route {
   
   pool Pool @relation(fields: [poolId], references: [id], onDelete: Cascade)
   tech User? @relation(fields: [techId], references: [id], onDelete: SetNull)
+  serviceHistory ServiceHistory[]
   
   @@index([poolId])
   @@index([techId])
   @@index([active])
 }
+
+enum ServiceStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum AdditiveChemicalType {
+  LIQUID_CHLORINE
+  MURIATIC_ACID
+  CHLORINE_TABLETS
+  DICHLOR
+  CAL_HYPO
+  SODA_ASH
+  BAKING_SODA
+  STABILIZER   // cyanuric acid
+  CALCIUM_CHLORIDE
+  ALGAECIDE
+  CLARIFIER
+  OTHER
+}
+
+enum DoseUnit {
+  FL_OZ
+  GAL
+  ML
+  L
+  OZ
+  LB
+  G
+}
+
+enum StorageProvider {
+  S3
+  R2
+  GCS
+}
+
+
+model ServiceHistory {
+  id                   String   @id @default(uuid())
+  routeId              String
+  serviceDate          DateTime
+  status               ServiceStatus
+  technicianId         String?
+  companyId            String?
+  checklistTemplateId String?
+  createdById          String?
+  updatedById          String?
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @default(now())
+
+  // relations
+  route         Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  technician    User?    @relation("ServiceTechnician", fields: [technicianId], references: [id], onDelete: SetNull)
+  company       Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  checklistTemplate ChecklistTemplate? @relation(fields: [checklistTemplateId], references: [id], onDelete: SetNull)
+  createdBy     User?    @relation("ServiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     User?    @relation("ServiceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  // new 1:1 readings
+  readings      ServiceReadings?
+  // per-visit checklist items
+  checklist     ServiceChecklistItem[]
+  // per-visit chemical doses
+  doses         ChemicalDose[]
+  // per-visit photos
+  photos        ServicePhoto[]
+
+  @@index([routeId])
+  @@index([serviceDate])
+  @@index([technicianId])
+  @@index([companyId])
+  @@index([checklistTemplateId])
+  @@unique([routeId, serviceDate]) // optional but useful to prevent dup visits per route/day
+}
+
+model ServiceReadings {
+  id               String   @id @default(uuid())
+  serviceHistoryId String   @unique
+  // core pool test readings
+  freeChlorine     Decimal? @db.Decimal(6,2) // ppm
+  totalChlorine    Decimal? @db.Decimal(6,2) // ppm (optional if you only track FC)
+  pH               Decimal? @db.Decimal(4,2)
+  totalAlkalinity  Int?     // ppm
+  calciumHardness  Int?     // ppm
+  cyanuricAcid     Int?     // ppm
+  salt             Int?     // ppm (if SWG pools)
+  temperatureC     Decimal? @db.Decimal(5,2) // °C (or use temperatureF)
+  tds              Int?     // ppm
+  orp              Int?     // mV
+
+  measuredAt       DateTime @default(now())
+  method           String?  // "drops", "photometer", "test strips" etc.
+  notes            String?
+
+  serviceHistory   ServiceHistory @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+}
+
+model ChemicalDose {
+  id               String       @id @default(uuid())
+  serviceHistoryId String
+  chemical         AdditiveChemicalType
+  amount           Decimal      @db.Decimal(10,3)
+  unit             DoseUnit
+  productName      String?      // optional SKU/brand
+  costCents        Int?         // store cost if you want COGS per visit
+  notes            String?
+  createdAt        DateTime     @default(now())
+
+  serviceHistory   ServiceHistory @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+
+  @@index([serviceHistoryId])
+  @@index([chemical])
+}
+
+model ChecklistTemplate {
+  id         String   @id @default(uuid())
+  companyId  String
+  name       String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
+  items      ChecklistItemTemplate[]
+  serviceHistory ServiceHistory[]
+
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model ChecklistItemTemplate {
+  id                   String   @id @default(uuid())
+  checklistTemplateId  String
+  label                String
+  // type can be extended ("BOOLEAN","NUMBER","TEXT","SELECT")
+  type                 String   @default("BOOLEAN")
+  orderIndex           Int      @default(0)
+  required             Boolean  @default(false)
+
+  template             ChecklistTemplate @relation(fields: [checklistTemplateId], references: [id], onDelete: Cascade)
+
+  @@index([checklistTemplateId])
+  ServiceChecklistItem ServiceChecklistItem[]
+}
+
+model ServiceChecklistItem {
+  id                 String   @id @default(uuid())
+  serviceHistoryId   String
+  // If created from a template:
+  itemTemplateId     String?
+  label              String   // denormalize for audit/history (keeps label even if template changes)
+  type               String   @default("BOOLEAN")
+  orderIndex         Int      @default(0) // preserve order from template
+  // values: for BOOLEAN use completed; for NUMBER/TEXT store here
+  completed          Boolean?
+  numericValue       Decimal? @db.Decimal(10,3)
+  textValue          String?
+  notedIssue         String?  // quick note if failed/observed problem
+  createdAt          DateTime @default(now())
+
+  serviceHistory     ServiceHistory        @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+  templateItem       ChecklistItemTemplate? @relation(fields: [itemTemplateId], references: [id], onDelete: Restrict) // Restrict to prevent orphaned items from deleted templates  (Restrict is safer than SetNull)        
+
+  @@index([serviceHistoryId])
+  @@index([itemTemplateId])
+}
+
+model ServicePhoto {
+  id               String          @id @default(uuid())
+  serviceHistoryId String
+  caption          String?
+  // storage
+  provider         StorageProvider @default(S3)
+  bucket           String
+  objectKey        String          // e.g. "companies/{companyId}/services/{serviceHistoryId}/{uuid}.jpg"
+  publicUrl        String?         // optional (you may prefer presigned URLs only)
+  etag             String?         // helps with cache/integrity
+  fileSize         Int?            // bytes
+  width            Int?
+  height           Int?
+  contentType      String?
+  uploadedById     String?
+  takenAt          DateTime?       // if you capture EXIF
+  createdAt        DateTime        @default(now())
+
+  serviceHistory   ServiceHistory  @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+  uploadedBy       User?           @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([serviceHistoryId])
+  @@index([uploadedById])
+  @@index([bucket, objectKey], map: "photo_object_idx")
+}
+
+
 model jackson_store {
   key        String    @id(map: "_jackson_store_key") @db.VarChar(1500)
   value      String
