@@ -9,43 +9,31 @@ import useSWR from 'swr';
 import type { ApiResponse } from 'types';
 import type { CustomerWithPoolsAndRoutes } from 'models/customer';
 import fetcher from '@/lib/fetcher';
-import Profile from '@/components/customers/details/Profile';
 import CustomerTab from '@/components/customers/CustomerTab';
+import PhotosComponent from '@/components/customers/photos/PhotosComponent';
 
-const CustomerDetails: NextPageWithLayout = () => {
+const CustomerPhotos: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { slug, id } = router.query;
   const { isLoading: companyLoading, isError: companyError, company } = useCompany();
   
   // Fetch the specific customer
-  const { data: customerData, error: customerError, isLoading: customerLoading, mutate: mutateCustomer } = useSWR<ApiResponse<CustomerWithPoolsAndRoutes>>(
+  const { data: customerData, error: customerError, isLoading: customerLoading } = useSWR<ApiResponse<CustomerWithPoolsAndRoutes>>(
     company && id ? `/api/companies/${slug}/customers/${id}` : null,
     fetcher
   );
-
-  const handleSaveSuccess = () => {
-    mutateCustomer(); // Refresh the customer data
-  };
 
   if (companyLoading || customerLoading) {
     return <div>Loading...</div>;
   }
 
-  if (companyError) {
-    return <div>Error: {companyError.message}</div>;
+  if (companyError || customerError) {
+    return <div>Error loading data</div>;
   }
 
-  if (customerError) {
-    return <div>Error: {customerError.message}</div>;
-  }
-
-  if (!company) {
-    return <div>Company not found</div>;
-  }
-
-  if (!customerData?.data) {
-    return <div>Loading...</div>;
+  if (!company || !customerData?.data) {
+    return <div>Not found</div>;
   }
 
   return (
@@ -62,15 +50,14 @@ const CustomerDetails: NextPageWithLayout = () => {
       </div>
 
       <CustomerTab 
-        activeTab="profile" 
+        activeTab="photos" 
         customer={customerData.data}
         companySlug={company.slug as string}
       />
 
-      <Profile 
-        customer={customerData.data}
-        company={company}
-        onSaveSuccess={handleSaveSuccess}
+      <PhotosComponent 
+        companySlug={company.slug as string} 
+        customerId={customerData.data.id as string} 
       />
     </div>
   );
@@ -86,4 +73,5 @@ export async function getServerSideProps({
   };
 }
 
-export default CustomerDetails;
+export default CustomerPhotos;
+

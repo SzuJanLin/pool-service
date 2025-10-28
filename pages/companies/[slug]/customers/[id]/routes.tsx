@@ -7,16 +7,23 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import type { ApiResponse } from 'types';
+import type { User } from '@prisma/client';
 import type { CustomerWithPoolsAndRoutes } from 'models/customer';
 import fetcher from '@/lib/fetcher';
-import Profile from '@/components/customers/details/Profile';
 import CustomerTab from '@/components/customers/CustomerTab';
+import RoutesComponent from '@/components/customers/route/Routes';
 
-const CustomerDetails: NextPageWithLayout = () => {
+const CustomerRoutes: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { slug, id } = router.query;
   const { isLoading: companyLoading, isError: companyError, company } = useCompany();
+  
+  // Fetch technicians for the company
+  const { data: techniciansData } = useSWR<ApiResponse<User[]>>(
+    company ? `/api/companies/${slug}/members` : null,
+    fetcher
+  );
   
   // Fetch the specific customer
   const { data: customerData, error: customerError, isLoading: customerLoading, mutate: mutateCustomer } = useSWR<ApiResponse<CustomerWithPoolsAndRoutes>>(
@@ -25,7 +32,7 @@ const CustomerDetails: NextPageWithLayout = () => {
   );
 
   const handleSaveSuccess = () => {
-    mutateCustomer(); // Refresh the customer data
+    mutateCustomer();
   };
 
   if (companyLoading || customerLoading) {
@@ -40,12 +47,8 @@ const CustomerDetails: NextPageWithLayout = () => {
     return <div>Error: {customerError.message}</div>;
   }
 
-  if (!company) {
-    return <div>Company not found</div>;
-  }
-
-  if (!customerData?.data) {
-    return <div>Loading...</div>;
+  if (!company || !customerData?.data) {
+    return <div>Not found</div>;
   }
 
   return (
@@ -62,15 +65,16 @@ const CustomerDetails: NextPageWithLayout = () => {
       </div>
 
       <CustomerTab 
-        activeTab="profile" 
+        activeTab="routes" 
         customer={customerData.data}
         companySlug={company.slug as string}
       />
 
-      <Profile 
-        customer={customerData.data}
+      <RoutesComponent 
+        customer={customerData.data} 
+        technicians={techniciansData?.data || []}
         company={company}
-        onSaveSuccess={handleSaveSuccess}
+        onRouteAdded={handleSaveSuccess}
       />
     </div>
   );
@@ -86,4 +90,5 @@ export async function getServerSideProps({
   };
 }
 
-export default CustomerDetails;
+export default CustomerRoutes;
+
