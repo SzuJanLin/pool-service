@@ -9,14 +9,19 @@ import useSWR from 'swr';
 import type { ApiResponse } from 'types';
 import type { CustomerWithPoolsAndRoutes } from 'models/customer';
 import fetcher from '@/lib/fetcher';
-import Profile from '@/components/customers/details/Profile';
 import CustomerTab from '@/components/customers/CustomerTab';
+import PoolComponent from '@/components/customers/details/Pool';
+import { useState } from 'react';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
+import Modal from '@/components/shared/Modal';
+import AddPool from '@/components/customers/details/pool/AddPool';
 
-const CustomerDetails: NextPageWithLayout = () => {
+const CustomerPools: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { slug, id } = router.query;
   const { isLoading: companyLoading, isError: companyError, company } = useCompany();
+  const [showAddPoolModal, setShowAddPoolModal] = useState(false);
   
   // Fetch the specific customer
   const { data: customerData, error: customerError, isLoading: customerLoading, mutate: mutateCustomer } = useSWR<ApiResponse<CustomerWithPoolsAndRoutes>>(
@@ -24,28 +29,17 @@ const CustomerDetails: NextPageWithLayout = () => {
     fetcher
   );
 
-  const handleSaveSuccess = () => {
-    mutateCustomer(); // Refresh the customer data
-  };
 
   if (companyLoading || customerLoading) {
     return <div>Loading...</div>;
   }
 
-  if (companyError) {
-    return <div>Error: {companyError.message}</div>;
+  if (companyError || customerError) {
+    return <div>Error loading data</div>;
   }
 
-  if (customerError) {
-    return <div>Error: {customerError.message}</div>;
-  }
-
-  if (!company) {
-    return <div>Company not found</div>;
-  }
-
-  if (!customerData?.data) {
-    return <div>Loading...</div>;
+  if (!company || !customerData?.data) {
+    return <div>Not found</div>;
   }
 
   return (
@@ -62,16 +56,39 @@ const CustomerDetails: NextPageWithLayout = () => {
       </div>
 
       <CustomerTab 
-        activeTab="profile" 
+        activeTab="pools" 
         customer={customerData.data}
         companySlug={company.slug as string}
       />
 
-      <Profile 
-        customer={customerData.data}
-        company={company}
-        onSaveSuccess={handleSaveSuccess}
-      />
+      <div className="mt-4">
+        <button 
+          onClick={() => setShowAddPoolModal(true)}
+          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none"
+        >
+          <PlusCircleIcon className="w-5 h-5 mr-2" />
+          {t('add-pool')}
+        </button>
+      </div>
+
+      <PoolComponent customer={customerData.data} />
+
+      {/* Add Pool Modal */}
+      <Modal open={showAddPoolModal} close={() => setShowAddPoolModal(false)}>
+        <Modal.Header>{t('add-pool')}</Modal.Header>
+        <Modal.Description>{t('add-new-pool-description')}</Modal.Description>
+        <Modal.Body>
+          <AddPool
+            company={company}
+            customer={customerData.data}
+            onSuccess={() => {
+              setShowAddPoolModal(false);
+              mutateCustomer();
+            }}
+            onCancel={() => setShowAddPoolModal(false)}
+          />
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
@@ -86,4 +103,5 @@ export async function getServerSideProps({
   };
 }
 
-export default CustomerDetails;
+export default CustomerPools;
+
