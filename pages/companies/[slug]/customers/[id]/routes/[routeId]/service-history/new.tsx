@@ -7,49 +7,37 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import type { ApiResponse } from 'types';
-import type { User } from '@prisma/client';
 import type { CustomerWithPoolsAndRoutes } from 'models/customer';
 import fetcher from '@/lib/fetcher';
 import CustomerTab from '@/components/customers/CustomerTab';
-import RoutesComponent from '@/components/customers/route/Routes';
-import ServiceHistoryComponent from '@/components/customers/route/ServiceHistory';
+import AddServiceHistory from '@/components/customers/route/AddServiceHistory';
 
-const CustomerRoutes: NextPageWithLayout = () => {
+const NewServiceHistoryPage: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
   const router = useRouter();
-  const { slug, id } = router.query;
+  const { slug, id, routeId } = router.query;
   const { isLoading: companyLoading, isError: companyError, company } = useCompany();
   
-  // Fetch technicians for the company
-  const { data: techniciansData } = useSWR<ApiResponse<User[]>>(
-    company ? `/api/companies/${slug}/members` : null,
-    fetcher
-  );
-  
   // Fetch the specific customer
-  const { data: customerData, error: customerError, isLoading: customerLoading, mutate: mutateCustomer } = useSWR<ApiResponse<CustomerWithPoolsAndRoutes>>(
+  const { data: customerData, error: customerError, isLoading: customerLoading } = useSWR<ApiResponse<CustomerWithPoolsAndRoutes>>(
     company && id ? `/api/companies/${slug}/customers/${id}` : null,
     fetcher
   );
-
-  const handleSaveSuccess = () => {
-    mutateCustomer();
-  };
 
   if (companyLoading || customerLoading) {
     return <div>Loading...</div>;
   }
 
-  if (companyError) {
-    return <div>Error: {companyError.message}</div>;
-  }
-
-  if (customerError) {
-    return <div>Error: {customerError.message}</div>;
+  if (companyError || customerError) {
+    return <div>Error loading data</div>;
   }
 
   if (!company || !customerData?.data) {
     return <div>Not found</div>;
+  }
+
+  if (!routeId || typeof routeId !== 'string') {
+    return <div>Route ID is required</div>;
   }
 
   return (
@@ -71,13 +59,11 @@ const CustomerRoutes: NextPageWithLayout = () => {
         companySlug={company.slug as string}
       />
 
-      <RoutesComponent 
-        customer={customerData.data} 
-        technicians={techniciansData?.data || []}
+      <AddServiceHistory
+        customer={customerData.data}
         company={company}
-        onRouteAdded={handleSaveSuccess}
+        routeId={routeId}
       />
-      <ServiceHistoryComponent customer={customerData.data} />
     </div>
   );
 };
@@ -92,5 +78,5 @@ export async function getServerSideProps({
   };
 }
 
-export default CustomerRoutes;
+export default NewServiceHistoryPage;
 
