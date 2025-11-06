@@ -128,6 +128,10 @@ const env = {
     bucket: process.env.R2_BUCKET_NAME,
     endpoint: process.env.R2_ENDPOINT_URL, // This will be something like https://your-account-id.r2.cloudflarestorage.com
     publicUrl: process.env.R2_PUBLIC_URL, // Optional: for direct public access
+  },
+
+  mapbox: {
+    publicToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
   }
 };
 

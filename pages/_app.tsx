@@ -9,6 +9,7 @@ import mixpanel from 'mixpanel-browser';
 
 import '@boxyhq/react-ui/dist/react-ui.css';
 import '../styles/globals.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect } from 'react';
 import env from '@/lib/env';
 import { Theme, applyTheme } from '@/lib/theme';

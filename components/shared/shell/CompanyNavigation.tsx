@@ -1,8 +1,8 @@
-import { Cog6ToothIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { Cog6ToothIcon, HomeIcon, MapIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'next-i18next';
 import NavigationItems from './NavigationItems';
 import { NavigationProps, MenuItem } from './NavigationItems';
-import { UserCircleIcon, ShieldCheckIcon, UsersIcon } from '@heroicons/react/20/solid';
+import { UserCircleIcon, UsersIcon } from '@heroicons/react/20/solid';
 
 interface NavigationItemsProps extends NavigationProps {
   slug: string;
@@ -23,6 +23,12 @@ const CompanyNavigation = ({ slug, activePathname }: NavigationItemsProps) => {
       href: `/companies/${slug}/customers`,
       icon: UsersIcon,
       active: activePathname === `/companies/${slug}/customers`,
+    },
+    {
+      name: t('routes'),
+      href: `/companies/${slug}/routes`,
+      icon: MapIcon,
+      active: activePathname === `/companies/${slug}/routes`,
     },
     {
       name: t('settings'),
