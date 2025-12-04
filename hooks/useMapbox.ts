@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import env from '../lib/env';
 
@@ -11,12 +11,16 @@ interface UseMapboxOptions {
 export const useMapbox = (options: UseMapboxOptions = {}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
 
   const {
     center = [-74.0242, 40.6941],
     zoom = 10.12,
     style = 'mapbox://styles/mapbox/streets-v12',
   } = options;
+
+  const centerLng = center[0];
+  const centerLat = center[1];
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -44,17 +48,21 @@ export const useMapbox = (options: UseMapboxOptions = {}) => {
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
           style,
-          center,
+          center: [centerLng, centerLat],
           zoom,
         });
 
         map.current.on('load', () => {
           console.log('Map loaded successfully');
+          setMapInstance(map.current);
         });
 
         map.current.on('error', (e) => {
           console.error('Map error:', e);
         });
+
+        // Set map instance immediately for synchronous access
+        setMapInstance(map.current);
       } catch (error) {
         console.error('Error initializing map:', error);
       }
@@ -68,10 +76,11 @@ export const useMapbox = (options: UseMapboxOptions = {}) => {
       if (map.current) {
         map.current.remove();
         map.current = null;
+        setMapInstance(null);
       }
     };
-  }, [center, zoom, style]);
+  }, [centerLng, centerLat, zoom, style]);
 
-  return { mapContainer, map: map.current as mapboxgl.Map | null };
+  return { mapContainer, map: mapInstance };
 };
 
