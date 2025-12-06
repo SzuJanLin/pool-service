@@ -56,23 +56,62 @@ const Routes: NextPageWithLayout = () => {
     return Object.values(grouped);
   }, [dailyRoutes]);
 
-  const mapRoutes = useMemo(() => {
-    if (!selectedTechId) return [];
-    const group = routesByTech.find(g => (g.tech?.id || 'unassigned') === selectedTechId);
-    return group ? group.routes : [];
-  }, [routesByTech, selectedTechId]);
+  // Helper to assign colors to technicians based on their index in the list
+  // This ensures distinct colors for the visible technicians
+  const getTechColor = useMemo(() => (techId: string | null) => {
+    if (!techId) return '#9CA3AF'; // Gray for unassigned
+    
+    // Find index of this tech in the current list
+    const index = routesByTech.findIndex(group => (group.tech?.id || 'unassigned') === techId);
+    
+    if (index === -1) return '#9CA3AF';
 
-  const mapAddresses = useMemo(() => {
+    // Extended palette for more variety
+    const colors = [
+      '#EF4444', // Red
+      '#3B82F6', // Blue
+      '#10B981', // Emerald
+      '#F59E0B', // Amber
+      '#8B5CF6', // Violet
+      '#EC4899', // Pink
+      '#06B6D4', // Cyan
+      '#84CC16', // Lime
+      '#F97316', // Orange
+      '#6366F1', // Indigo
+      '#14B8A6', // Teal
+      '#D946EF', // Fuchsia
+    ];
+    
+    return colors[index % colors.length];
+  }, [routesByTech]);
+
+  const mapRoutes = useMemo(() => {
+    if (!selectedTechId) {
+      // Return all routes
+      return dailyRoutes;
+    }
+    // Return only selected tech routes
+    return dailyRoutes.filter(route => (route.techId || 'unassigned') === selectedTechId);
+  }, [dailyRoutes, selectedTechId]);
+
+  const mapData = useMemo(() => {
     return mapRoutes.map(route => {
       const customer = route.pool.customer;
-      return [
-        customer.addressStreet,
-        customer.addressCity,
-        customer.addressState,
-        customer.addressZip
-      ].filter(Boolean).join(', ');
-    }).filter(addr => addr.length > 0);
-  }, [mapRoutes]);
+      return {
+        id: route.id,
+        techId: route.techId || 'unassigned',
+        color: getTechColor(route.techId),
+        address: [
+          customer.addressStreet,
+          customer.addressCity,
+          customer.addressState,
+          customer.addressZip
+        ].filter(Boolean).join(', '),
+        customerName: `${customer.firstName} ${customer.lastName}`,
+        index: 0 // Will be set during processing per tech
+      };
+    }).filter(item => item.address.length > 0);
+  }, [mapRoutes, getTechColor]);
 
   // Approximate center for Provo, Utah (will be updated after geocoding)
   const mapOptions = useMemo(() => ({
@@ -113,7 +152,7 @@ const Routes: NextPageWithLayout = () => {
     if (!map) return;
 
 
-  }, [map, mapAddresses]); // Placeholder to be replaced by actual logic below
+  }, [map, mapData]); // Placeholder to be replaced by actual logic below
 
   // Ref to store current markers to clear them on update
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -126,86 +165,111 @@ const Routes: NextPageWithLayout = () => {
       markersRef.current.forEach(marker => marker.remove());
       markersRef.current = [];
 
-      // Remove existing route layer/source
-      if (map.getLayer('route')) map.removeLayer('route');
-      if (map.getSource('route')) map.removeSource('route');
+      // Remove existing route layers/sources
+      // We need to remove all potential layers. 
+      // Since IDs are dynamic (route-techId), we might need to track added layers.
+      // For simplicity, let's assume we clear all layers that start with 'route-'
+      const style = map.getStyle();
+      if (style && style.layers) {
+        style.layers.forEach(layer => {
+          if (layer.id.startsWith('route-')) {
+            map.removeLayer(layer.id);
+          }
+        });
+      }
+      // Sources too
+      if (style && style.sources) {
+        Object.keys(style.sources).forEach(sourceId => {
+          if (sourceId.startsWith('route-')) {
+            map.removeSource(sourceId);
+          }
+        });
+      }
 
-      if (mapAddresses.length === 0) return;
+      if (mapData.length === 0) return;
 
       try {
         const token = env.mapbox.publicToken || '';
-        if (!token) {
-          console.error('Mapbox token is not set');
-          return;
-        }
+        if (!token) return;
 
         const bounds = new mapboxgl.LngLatBounds();
-        const orderedCoordinates: Array<{ index: number; coords: [number, number] }> = [];
+        
+        // Group data by techId to draw separate lines
+        const groupedData: Record<string, typeof mapData> = {};
+        mapData.forEach(item => {
+          if (!groupedData[item.techId]) groupedData[item.techId] = [];
+          groupedData[item.techId].push(item);
+        });
 
-        // Process addresses sequentially
-        await Promise.all(mapAddresses.map(async (address, index) => {
-          try {
-            const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${token}&limit=1`;
-            
-            const response = await fetch(geocodeUrl);
-            const data = await response.json();
+        // Process each tech group
+        await Promise.all(Object.entries(groupedData).map(async ([techId, items]) => {
+          const orderedCoordinates: Array<{ index: number; coords: [number, number] }> = [];
+          const color = items[0].color; // All items in group have same color
 
-            if (data.features && data.features.length > 0) {
-              const [lng, lat] = data.features[0].center;
-              const coordinates: [number, number] = [lng, lat];
+          await Promise.all(items.map(async (item, index) => {
+            try {
+              const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(item.address)}.json?access_token=${token}&limit=1`;
+              const response = await fetch(geocodeUrl);
+              const data = await response.json();
 
-              // Create and add marker
-              const marker = new mapboxgl.Marker({
-                color: '#3B82F6',
-                scale: 1.2,
-              })
-                .setLngLat(coordinates)
-                .setPopup(new mapboxgl.Popup().setHTML(`<div class="p-2"><strong>Location ${index + 1}</strong><br/>${address}</div>`))
-                .addTo(map);
+              if (data.features && data.features.length > 0) {
+                const [lng, lat] = data.features[0].center;
+                const coordinates: [number, number] = [lng, lat];
 
-              markersRef.current.push(marker);
-              orderedCoordinates.push({ index, coords: coordinates });
-              bounds.extend(coordinates);
+                // Create colored marker
+                const marker = new mapboxgl.Marker({
+                  color: color,
+                  scale: 1.0, // Slightly smaller for multiple techs
+                })
+                  .setLngLat(coordinates)
+                  .setPopup(new mapboxgl.Popup().setHTML(`<div class="p-2"><strong>${item.customerName}</strong><br/>${item.address}</div>`))
+                  .addTo(map);
+
+                markersRef.current.push(marker);
+                orderedCoordinates.push({ index, coords: coordinates });
+                bounds.extend(coordinates);
+              }
+            } catch (e) {
+              console.error(e);
             }
-          } catch (error) {
-            console.error('Error geocoding address:', address, error);
+          }));
+
+          // Draw line for this tech
+          orderedCoordinates.sort((a, b) => a.index - b.index);
+          const routeCoordinates = orderedCoordinates.map(item => item.coords);
+
+          if (routeCoordinates.length > 1) {
+            const routeId = `route-${techId}`;
+            map.addSource(routeId, {
+              'type': 'geojson',
+              'data': {
+                'type': 'Feature',
+                'properties': {},
+                'geometry': {
+                  'type': 'LineString',
+                  'coordinates': routeCoordinates
+                }
+              }
+            });
+
+            map.addLayer({
+              'id': routeId,
+              'type': 'line',
+              'source': routeId,
+              'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+              },
+              'paint': {
+                'line-color': color,
+                'line-width': 4,
+                'line-opacity': 0.8
+              }
+            });
           }
         }));
 
-        // Sort and draw line
-        orderedCoordinates.sort((a, b) => a.index - b.index);
-        const routeCoordinates = orderedCoordinates.map(item => item.coords);
-
-        if (routeCoordinates.length > 1) {
-          map.addSource('route', {
-            'type': 'geojson',
-            'data': {
-              'type': 'Feature',
-              'properties': {},
-              'geometry': {
-                'type': 'LineString',
-                'coordinates': routeCoordinates
-              }
-            }
-          });
-
-          map.addLayer({
-            'id': 'route',
-            'type': 'line',
-            'source': 'route',
-            'layout': {
-              'line-join': 'round',
-              'line-cap': 'round'
-            },
-            'paint': {
-              'line-color': '#3B82F6',
-              'line-width': 4,
-              'line-opacity': 0.8
-            }
-          });
-        }
-
-        if (routeCoordinates.length > 0) {
+        if (!bounds.isEmpty()) {
           map.fitBounds(bounds, {
             padding: 50,
             maxZoom: 15,
@@ -219,7 +283,7 @@ const Routes: NextPageWithLayout = () => {
 
     updateMap();
 
-  }, [map, mapAddresses]);
+  }, [map, mapData]);
 
   return (
     <div className="flex h-[600px] w-full gap-4">
@@ -262,7 +326,13 @@ const Routes: NextPageWithLayout = () => {
                   onClick={() => setSelectedTechId(isSelected ? null : techId)}
                 >
                   <div className="font-semibold text-gray-900 mb-2 pb-2 border-b flex justify-between items-center">
-                    <span>{group.tech ? group.tech.name : 'Unassigned'}</span>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: getTechColor(group.tech?.id || null) }}
+                      />
+                      <span>{group.tech ? group.tech.name : 'Unassigned'}</span>
+                    </div>
                     <span className="ml-2 text-xs font-normal text-gray-500">
                       ({group.routes.length} routes)
                     </span>
