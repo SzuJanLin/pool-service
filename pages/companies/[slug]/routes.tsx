@@ -124,13 +124,12 @@ const Routes: NextPageWithLayout = () => {
   // Generate week starting from today
   const weekDays = useMemo(() => {
     const today = new Date();
-    const days: Array<{ date: Date; label: string; isSelected: boolean }> = [];
+    const days: Array<{ date: Date; dayName: string; dayNumber: number; isSelected: boolean }> = [];
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      const month = date.getMonth() + 1;
       const day = date.getDate();
       const dayName = dayNames[date.getDay()];
       
@@ -139,7 +138,8 @@ const Routes: NextPageWithLayout = () => {
 
       days.push({
         date,
-        label: `${month}/${day} ${dayName}`,
+        dayName,
+        dayNumber: day,
         isSelected,
       });
     }
@@ -161,6 +161,12 @@ const Routes: NextPageWithLayout = () => {
     if (!map) return;
 
     const updateMap = async () => {
+      // Ensure map style is loaded before accessing layers
+      if (!map.isStyleLoaded()) {
+        map.once('style.load', updateMap);
+        return;
+      }
+
       // Clear existing markers
       markersRef.current.forEach(marker => marker.remove());
       markersRef.current = [];
@@ -290,19 +296,20 @@ const Routes: NextPageWithLayout = () => {
       {/* Calendar Side */}
       <div className="w-1/3 bg-white shadow rounded-lg p-4 flex flex-col">
         <h2 className="text-lg font-semibold mb-4">Week Schedule</h2>
-        {/* Week Header - Horizontal */}
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+        {/* Week Header - Grid Style */}
+        <div className="grid grid-cols-7 gap-1 mb-4 bg-gray-100 p-1 rounded-lg">
           {weekDays.map((day, index) => (
             <button
               key={index}
               onClick={() => setSelectedDate(day.date)}
-              className={`flex-shrink-0 p-2 rounded-md border-2 transition-colors text-center min-w-[80px] ${
+              className={`flex flex-col items-center justify-center py-2 rounded-md transition-all ${
                 day.isSelected
-                  ? 'bg-blue-50 border-blue-500 font-semibold'
-                  : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                  ? 'bg-white shadow-sm text-blue-600 font-bold ring-1 ring-gray-200'
+                  : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
               }`}
             >
-              <div className="text-xs text-gray-600">{day.label}</div>
+              <span className="text-[10px] uppercase tracking-wider">{day.dayName}</span>
+              <span className="text-sm font-medium">{day.dayNumber}</span>
             </button>
           ))}
         </div>
