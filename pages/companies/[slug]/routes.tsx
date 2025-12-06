@@ -294,7 +294,7 @@ const Routes: NextPageWithLayout = () => {
   return (
     <div className="flex h-[600px] w-full gap-4">
       {/* Calendar Side */}
-      <div className="w-1/3 bg-white shadow rounded-lg p-4 flex flex-col">
+      <div className="flex-1 bg-white shadow rounded-lg p-4 flex flex-col">
         <h2 className="text-lg font-semibold mb-4">Week Schedule</h2>
         {/* Week Header - Grid Style */}
         <div className="grid grid-cols-7 gap-1 mb-4 bg-gray-100 p-1 rounded-lg">
@@ -313,61 +313,120 @@ const Routes: NextPageWithLayout = () => {
             </button>
           ))}
         </div>
-        {/* Calendar Content Area */}
-        <div className="flex-1 overflow-y-auto space-y-4">
-          {routesByTech.length === 0 ? (
-            <div className="text-gray-500 text-center py-4">No routes scheduled for this day</div>
-          ) : (
-            routesByTech.map((group) => {
-              const techId = group.tech?.id || 'unassigned';
-              const isSelected = selectedTechId === techId;
-
-              return (
-                <div 
-                  key={techId} 
-                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
-                    isSelected 
-                      ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50' 
-                      : 'hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedTechId(isSelected ? null : techId)}
-                >
-                  <div className="font-semibold text-gray-900 mb-2 pb-2 border-b flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: getTechColor(group.tech?.id || null) }}
-                      />
-                      <span>{group.tech ? group.tech.name : 'Unassigned'}</span>
-                    </div>
-                    <span className="ml-2 text-xs font-normal text-gray-500">
-                      ({group.routes.length} routes)
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {group.routes.map((route) => (
-                      <div key={route.id} className={`text-sm p-2 rounded transition-colors ${
-                        isSelected ? 'bg-white' : 'bg-gray-50'
-                      }`}>
-                        <div className="font-medium">{route.pool.customer.firstName} {route.pool.customer.lastName}</div>
-                        <div className="text-gray-500 text-xs mt-1">
-                          {[
-                            route.pool.customer.addressStreet,
-                            route.pool.customer.addressCity
-                          ].filter(Boolean).join(', ')}
+        {/* Content Split - Two Columns */}
+        <div className="flex-1 flex gap-6 overflow-hidden mt-4">
+          
+          {/* Left Column: Technicians List */}
+          <div className="w-1/3 overflow-y-auto pr-2 space-y-3 border-r">
+             {routesByTech.length === 0 ? (
+               <div className="text-gray-500 text-sm text-center py-4">No techs scheduled</div>
+             ) : (
+               routesByTech.map((group) => {
+                 const techId = group.tech?.id || 'unassigned';
+                 const isSelected = selectedTechId === techId;
+                 const routeCount = group.routes.length;
+                 
+                 return (
+                   <div 
+                     key={techId}
+                     onClick={() => setSelectedTechId(isSelected ? null : techId)}
+                     className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                       isSelected 
+                         ? 'border-blue-500 bg-blue-50 shadow-sm' 
+                         : 'border-gray-200 hover:border-gray-300 bg-white'
+                     }`}
+                   >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                           <div 
+                             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                             style={{ backgroundColor: getTechColor(group.tech?.id || null) }}
+                           >
+                              {group.tech ? (group.tech.name?.[0] || 'T') : 'U'}
+                           </div>
+                           <div>
+                              <div className="font-medium text-gray-900 text-sm">
+                                {group.tech ? group.tech.name : 'Unassigned'}
+                              </div>
+                              <div className="text-xs text-gray-500">{routeCount} stops</div>
+                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })
-          )}
+                      
+                      {/* Progress bar simulation */}
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 mt-3">
+                        <div className="bg-gray-400 h-1.5 rounded-full" style={{ width: '0%' }}></div>
+                      </div>
+                      <div className="flex justify-between mt-1 text-[10px] text-gray-400">
+                         <span>No stops</span>
+                         <span>0 of {routeCount}</span>
+                      </div>
+                   </div>
+                 );
+               })
+             )}
+          </div>
+
+          {/* Right Column: Routes Detail */}
+          <div className="flex-1 overflow-y-auto pl-2">
+             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Customer Stops</h3>
+             
+             {!selectedTechId ? (
+               <div className="flex flex-col items-center justify-center h-64 text-gray-400 bg-gray-50 rounded-lg border border-dashed">
+                 <p>Select a technician to view their route</p>
+               </div>
+             ) : (
+               (() => {
+                 const selectedGroup = routesByTech.find(g => (g.tech?.id || 'unassigned') === selectedTechId);
+                 if (!selectedGroup) return <div>Technician not found</div>;
+                 
+                 return (
+                   <div className="space-y-4">
+                     <div className="bg-blue-50 px-4 py-2 rounded text-sm font-medium text-blue-900">
+                       <span className="text-xs bg-white px-2 py-0.5 rounded text-blue-600 border border-blue-100">
+                         {selectedGroup.routes.length} stops
+                       </span>
+                     </div>
+                     
+                     {selectedGroup.routes.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">No stops for this day</div>
+                     ) : (
+                        <div className="space-y-3">
+                          {selectedGroup.routes.map((route, idx) => (
+                            <div key={route.id} className="flex items-start gap-3 p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                               <div className="flex flex-col items-center gap-1 mt-1">
+                                  <div className="w-6 h-6 rounded-full bg-gray-100 border flex items-center justify-center text-xs font-medium text-gray-600">
+                                    {idx + 1}
+                                  </div>
+                               </div>
+                               <div className="flex-1">
+                                  <div className="font-medium text-gray-900">
+                                    {route.pool.customer.firstName} {route.pool.customer.lastName}
+                                  </div>
+                                  <div className="text-sm text-gray-500 mt-0.5">
+                                    {[
+                                      route.pool.customer.addressStreet,
+                                      route.pool.customer.addressCity
+                                    ].filter(Boolean).join(', ')}
+                                  </div>
+                               </div>
+                               <div className="text-xs text-gray-400 font-mono">
+                                 --:--
+                               </div>
+                            </div>
+                          ))}
+                        </div>
+                     )}
+                   </div>
+                 );
+               })()
+             )}
+          </div>
         </div>
       </div>
 
       {/* Map Side */}
-      <div className="flex-1 relative rounded-lg overflow-hidden shadow">
+      <div className="w-1/3 relative rounded-lg overflow-hidden shadow">
         <div 
           id="map-container" 
           ref={mapContainer} 
