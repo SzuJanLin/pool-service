@@ -9,6 +9,29 @@ export const createRoute = async (
   });
 };
 
+export const getCompanyRoutes = async (companyId: string): Promise<Route[]> => {
+  return await prisma.route.findMany({
+    where: {
+      pool: {
+        customer: {
+          companyId,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      tech: true,
+      pool: {
+        include: {
+          customer: true,
+        },
+      },
+    },
+  });
+};
+
 export const getRoutes = async (poolId: string): Promise<Route[]> => {
   return await prisma.route.findMany({
     where: {
