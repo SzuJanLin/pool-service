@@ -6,6 +6,7 @@ import {
   getCustomers,
   deleteCustomer,
   updateCustomer,
+  getCustomer,
 } from 'models/customer';
 import {
   createCustomerSchema,
@@ -13,6 +14,7 @@ import {
   deleteCustomerSchema,
   validateWithSchema,
 } from '@/lib/zod';
+import { geocodeAddress } from '@/lib/geocoding';
 
 export default async function handler(
   req: NextApiRequest,
@@ -94,6 +96,22 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
     status,
   } = validateWithSchema(createCustomerSchema, req.body);
 
+  // Geocode address
+  const fullAddress = [addressStreet, addressCity, addressState, addressZip]
+    .filter(Boolean)
+    .join(', ');
+  
+  let lat = null;
+  let lng = null;
+
+  if (fullAddress) {
+    const coords = await geocodeAddress(fullAddress);
+    if (coords) {
+      lat = coords.lat;
+      lng = coords.lng;
+    }
+  }
+
   const customer = await createCustomer({
     firstName,
     lastName,
@@ -103,6 +121,8 @@ const handlePOST = async (req: NextApiRequest, res: NextApiResponse) => {
     addressCity: addressCity || null,
     addressState: addressState || null,
     addressZip: addressZip || null,
+    lat,
+    lng,
     notes: notes || null,
     status,
     company: {
@@ -156,6 +176,45 @@ const handlePATCH = async (req: NextApiRequest, res: NextApiResponse) => {
     status,
   } = validateWithSchema(updateCustomerSchema, req.body);
 
+  let lat: number | null | undefined = undefined;
+  let lng: number | null | undefined = undefined;
+
+  // Check if address is being updated
+  const isUpdatingAddress = 
+    addressStreet !== undefined || 
+    addressCity !== undefined || 
+    addressState !== undefined || 
+    addressZip !== undefined;
+
+  if (isUpdatingAddress) {
+    const currentCustomer = await getCustomer(customerId, companyMember.company.id);
+    if (currentCustomer) {
+      const newStreet = addressStreet !== undefined ? addressStreet : currentCustomer.addressStreet;
+      const newCity = addressCity !== undefined ? addressCity : currentCustomer.addressCity;
+      const newState = addressState !== undefined ? addressState : currentCustomer.addressState;
+      const newZip = addressZip !== undefined ? addressZip : currentCustomer.addressZip;
+
+      const fullAddress = [newStreet, newCity, newState, newZip].filter(Boolean).join(', ');
+      
+      if (fullAddress) {
+        const coords = await geocodeAddress(fullAddress);
+        if (coords) {
+          lat = coords.lat;
+          lng = coords.lng;
+        } else {
+          // Address updated but geocoding failed/not found, explicitly clear coords?
+          // Or keep old ones? Usually if address changes, old coords are invalid.
+          lat = null;
+          lng = null;
+        }
+      } else {
+        // Address cleared
+        lat = null;
+        lng = null;
+      }
+    }
+  }
+
   const updatedCustomer = await updateCustomer(
     customerId,
     companyMember.company.id,
@@ -168,6 +227,8 @@ const handlePATCH = async (req: NextApiRequest, res: NextApiResponse) => {
       ...(addressCity !== undefined && { addressCity: addressCity || null }),
       ...(addressState !== undefined && { addressState: addressState || null }),
       ...(addressZip !== undefined && { addressZip: addressZip || null }),
+      ...(lat !== undefined && { lat }),
+      ...(lng !== undefined && { lng }),
       ...(notes !== undefined && { notes: notes || null }),
       ...(status && { status }),
     }
