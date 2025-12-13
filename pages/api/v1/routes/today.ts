@@ -1,7 +1,7 @@
 import { NextApiResponse } from 'next';
 import { withMobileAuth, MobileAuthRequest } from '@/lib/middleware/mobile-auth';
 import { prisma } from '@/lib/prisma';
-import { DayOfWeek } from '@prisma/client';
+import { DayOfWeek, ServiceStatus } from '@prisma/client';
 
 const startOfDay = (date: Date) => {
   const d = new Date(date);
@@ -23,8 +23,11 @@ const handler = async (req: MobileAuthRequest, res: NextApiResponse) => {
       case 'GET':
         await handleGET(req, res);
         break;
+      case 'POST':
+        await handlePOST(req, res);
+        break;
       default:
-        res.setHeader('Allow', 'GET');
+        res.setHeader('Allow', 'GET, POST');
         res.status(405).json({
           error: { message: `Method ${method} Not Allowed` },
         });
@@ -35,6 +38,79 @@ const handler = async (req: MobileAuthRequest, res: NextApiResponse) => {
 
     res.status(status).json({ error: { message } });
   }
+};
+
+const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse) => {
+  const user = req.mobileUser;
+  if (!user) {
+    return res.status(401).json({ error: { message: 'Unauthorized' } });
+  }
+
+  const { routeId, status } = req.body;
+
+  if (!routeId || !status) {
+    return res.status(400).json({ error: { message: 'Missing routeId or status' } });
+  }
+
+  // Validate status is a valid ServiceStatus enum value
+  // Note: status from body is a string, we need to check if it's in the enum values
+  const isValidStatus = Object.values(ServiceStatus).includes(status as ServiceStatus);
+  
+  if (!isValidStatus) {
+      return res.status(400).json({ error: { message: `Invalid status value: ${status}` } });
+  }
+
+  // Verify route belongs to tech
+  const route = await prisma.route.findFirst({
+    where: {
+      id: routeId,
+      techId: user.id,
+    },
+  });
+
+  if (!route) {
+    return res.status(404).json({ error: { message: 'Route not found' } });
+  }
+
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const todayEnd = endOfDay(now);
+
+  // Find or create service history for today
+  let serviceHistory = await prisma.serviceHistory.findFirst({
+    where: {
+      routeId: routeId,
+      serviceDate: {
+        gte: todayStart,
+        lte: todayEnd,
+      },
+    },
+  });
+
+  if (serviceHistory) {
+    // Update existing
+    serviceHistory = await prisma.serviceHistory.update({
+      where: { id: serviceHistory.id },
+      data: {
+        status: status as ServiceStatus,
+        updatedById: user.id,
+      },
+    });
+  } else {
+    // Create new
+    serviceHistory = await prisma.serviceHistory.create({
+      data: {
+        routeId: routeId,
+        serviceDate: now,
+        status: status as ServiceStatus,
+        technicianId: user.id,
+        createdById: user.id,
+        updatedById: user.id,
+      },
+    });
+  }
+
+  res.status(200).json({ success: true, data: serviceHistory });
 };
 
 const handleGET = async (req: MobileAuthRequest, res: NextApiResponse) => {
@@ -124,4 +200,3 @@ const handleGET = async (req: MobileAuthRequest, res: NextApiResponse) => {
 };
 
 export default withMobileAuth(handler);
-
