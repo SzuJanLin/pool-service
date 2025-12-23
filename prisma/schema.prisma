@@ -89,6 +89,8 @@ model Company {
   customers       Customer[]
   checklistTemplates ChecklistTemplate[]
   serviceHistory  ServiceHistory[]
+  readingDefinitions ReadingDefinition[]
+  dosageDefinitions  DosageDefinition[]
   
   @@index([billingId])
 }
@@ -517,4 +519,39 @@ model jackson_ttl {
 
   @@index([expiresAt], map: "_jackson_ttl_expires_at")
   @@ignore
+}
+
+model ReadingDefinition {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  unit      String?
+  min       Decimal? @db.Decimal(10,2)
+  max       Decimal? @db.Decimal(10,2)
+  orderIndex Int     @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model DosageDefinition {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  unit      DoseUnit
+  cost      Decimal? @db.Decimal(10,2)
+  orderIndex Int     @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
 }
