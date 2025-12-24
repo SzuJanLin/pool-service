@@ -3,7 +3,7 @@ import type { Company, Customer } from '@prisma/client';
 import { useFormik } from 'formik';
 import { useTranslation } from 'next-i18next';
 import React, { useState } from 'react';
-import { Button, Select } from 'react-daisyui';
+import { Button } from 'react-daisyui';
 import toast from 'react-hot-toast';
 import type { ApiResponse } from 'types';
 import * as Yup from 'yup';
@@ -16,7 +16,6 @@ interface AddPoolProps {
   onCancel?: () => void;
 }
 
-const chemicalTypes = ['CHLORINE', 'BROMINE', 'SALT', 'OTHER'] as const;
 const poolPresets = ['Pool', 'SPA', 'Water Feature', 'Other'] as const;
 
 const AddPool = ({ company, customer, onSuccess, onCancel }: AddPoolProps) => {
@@ -27,7 +26,6 @@ const AddPool = ({ company, customer, onSuccess, onCancel }: AddPoolProps) => {
     initialValues: {
       name: 'Pool',
       gallons: '',
-      chemicalType: '',
       baselinePressure: '',
       notes: '',
     },
@@ -38,7 +36,6 @@ const AddPool = ({ company, customer, onSuccess, onCancel }: AddPoolProps) => {
         'Must be a positive number',
         (value) => !value || value === '' || (Number(value) > 0 && !isNaN(Number(value)))
       ),
-      chemicalType: Yup.string().oneOf([...chemicalTypes, '']),
       baselinePressure: Yup.string().test(
         'is-positive-number',
         'Must be a positive number',
@@ -53,7 +50,6 @@ const AddPool = ({ company, customer, onSuccess, onCancel }: AddPoolProps) => {
       const body = JSON.stringify({
         name: values.name,
         gallons: values.gallons && values.gallons !== '' ? parseInt(values.gallons, 10) : null,
-        chemicalType: values.chemicalType && values.chemicalType !== '' ? values.chemicalType : null,
         baselinePressure: values.baselinePressure && values.baselinePressure !== '' ? parseFloat(values.baselinePressure) : null,
         notes: values.notes && values.notes !== '' ? values.notes : null,
       });
@@ -144,26 +140,6 @@ const AddPool = ({ company, customer, onSuccess, onCancel }: AddPoolProps) => {
           placeholder={t('pool-gallons')}
         />
 
-        {/* Chemical Type - Optional */}
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text">{t('pool-chemical-type')}</span>
-          </label>
-          <Select
-            name="chemicalType"
-            value={formik.values.chemicalType}
-            onChange={formik.handleChange}
-            className="w-full"
-          >
-            <option value="">{t('select')} {t('pool-chemical-type')}</option>
-            {chemicalTypes.map((type) => (
-              <option key={type} value={type}>
-                {t(`chemical-type-${type.toLowerCase()}`)}
-              </option>
-            ))}
-          </Select>
-        </div>
-
         {/* Baseline Pressure - Optional */}
         <InputWithLabel
           label={t('pool-baseline-pressure')}
@@ -209,4 +185,3 @@ const AddPool = ({ company, customer, onSuccess, onCancel }: AddPoolProps) => {
 };
 
 export default AddPool;
-

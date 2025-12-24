@@ -296,21 +296,6 @@ enum ServiceStatus {
   CANCELLED
 }
 
-enum AdditiveChemicalType {
-  LIQUID_CHLORINE
-  MURIATIC_ACID
-  CHLORINE_TABLETS
-  DICHLOR
-  CAL_HYPO
-  SODA_ASH
-  BAKING_SODA
-  STABILIZER   // cyanuric acid
-  CALCIUM_CHLORIDE
-  ALGAECIDE
-  CLARIFIER
-  OTHER
-}
-
 enum DoseUnit {
   FL_OZ
   GAL
@@ -350,12 +335,8 @@ model ServiceHistory {
   createdBy     User?    @relation("ServiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   updatedBy     User?    @relation("ServiceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
-  // new 1:1 readings
-  readings      ServiceReadings?
   // per-visit checklist items
   checklist     ServiceChecklistItem[]
-  // per-visit chemical doses
-  doses         ChemicalDose[]
   // per-visit photos
   photos        ServicePhoto[]
 
@@ -365,45 +346,6 @@ model ServiceHistory {
   @@index([companyId])
   @@index([checklistTemplateId])
   @@unique([routeId, serviceDate]) // optional but useful to prevent dup visits per route/day
-}
-
-model ServiceReadings {
-  id               String   @id @default(uuid())
-  serviceHistoryId String   @unique
-  // core pool test readings
-  freeChlorine     Decimal? @db.Decimal(6,2) // ppm
-  totalChlorine    Decimal? @db.Decimal(6,2) // ppm (optional if you only track FC)
-  pH               Decimal? @db.Decimal(4,2)
-  totalAlkalinity  Int?     // ppm
-  calciumHardness  Int?     // ppm
-  cyanuricAcid     Int?     // ppm
-  salt             Int?     // ppm (if SWG pools)
-  temperatureC     Decimal? @db.Decimal(5,2) // °C (or use temperatureF)
-  tds              Int?     // ppm
-  orp              Int?     // mV
-
-  measuredAt       DateTime @default(now())
-  method           String?  // "drops", "photometer", "test strips" etc.
-  notes            String?
-
-  serviceHistory   ServiceHistory @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
-}
-
-model ChemicalDose {
-  id               String       @id @default(uuid())
-  serviceHistoryId String
-  chemical         AdditiveChemicalType
-  amount           Decimal      @db.Decimal(10,3)
-  unit             DoseUnit
-  productName      String?      // optional SKU/brand
-  costCents        Int?         // store cost if you want COGS per visit
-  notes            String?
-  createdAt        DateTime     @default(now())
-
-  serviceHistory   ServiceHistory @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
-
-  @@index([serviceHistoryId])
-  @@index([chemical])
 }
 
 model ChecklistTemplate {
@@ -526,8 +468,10 @@ model ReadingDefinition {
   companyId String
   name      String
   unit      String?
-  min       Decimal? @db.Decimal(10,2)
-  max       Decimal? @db.Decimal(10,2)
+  // Stores comma-separated list of allowed values e.g. "1,2,3,4,5" or JSON array
+  values    String[] @default([]) 
+  defaultValue String?
+  
   orderIndex Int     @default(0)
   
   createdAt DateTime @default(now())
@@ -543,8 +487,13 @@ model DosageDefinition {
   id        String   @id @default(uuid())
   companyId String
   name      String
-  unit      DoseUnit
+  unit      String?
+  dosageType String?
   cost      Decimal? @db.Decimal(10,2)
+  // Stores comma-separated list of allowed values e.g. "0.5, 1, 1.5"
+  values    String[] @default([])
+  defaultValue String?
+
   orderIndex Int     @default(0)
   
   createdAt DateTime @default(now())

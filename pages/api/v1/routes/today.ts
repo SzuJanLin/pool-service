@@ -66,11 +66,20 @@ const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse) => {
       id: routeId,
       techId: user.id,
     },
+    include: {
+      pool: {
+        include: {
+          customer: true,
+        },
+      },
+    },
   });
 
   if (!route) {
     return res.status(404).json({ error: { message: 'Route not found' } });
   }
+
+  const companyId = route.pool.customer.companyId;
 
   const now = new Date();
   const todayStart = startOfDay(now);
@@ -104,6 +113,7 @@ const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse) => {
         serviceDate: now,
         status: status as ServiceStatus,
         technicianId: user.id,
+        companyId: companyId,
         createdById: user.id,
         updatedById: user.id,
       },
@@ -190,6 +200,7 @@ const handleGET = async (req: MobileAuthRequest, res: NextApiResponse) => {
       poolName: route.pool.name,
       lat: customer.lat ? Number(customer.lat) : null,
       lng: customer.lng ? Number(customer.lng) : null,
+      serviceHistoryId: history?.id,
     };
   });
 

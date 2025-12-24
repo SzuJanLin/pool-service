@@ -30,6 +30,15 @@ const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTab
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   }[] = [];
 
+  if (canAccess('company', ['update', 'read'])) {
+    navigations.push({
+      name: 'Readings & Dosages',
+      href: `/companies/${company.slug}/readings-dosages`,
+      active: activeTab === 'readings-dosages',
+      icon: DocumentMagnifyingGlassIcon,
+    });
+  }
+
   if (canAccess('company_member', ['create', 'update', 'read', 'delete'])) {
     navigations.push({
       name: 'Members',
