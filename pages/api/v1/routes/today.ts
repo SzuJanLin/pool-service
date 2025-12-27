@@ -145,19 +145,19 @@ const handleGET = async (req: MobileAuthRequest, res: NextApiResponse) => {
   // Fetch routes for this tech and day
   // TODO: Implement advanced frequency logic (biweekly, etc.)
   const routes = await prisma.route.findMany({
-    where: {
-      techId: user.id,
-      dayOfWeek: currentDayOfWeek,
-      active: true,
-    },
-    include: {
-      pool: {
-        include: {
-          customer: true,
+      where: {
+        techId: user.id,
+        dayOfWeek: currentDayOfWeek,
+        active: true,
+      },
+      include: {
+        pool: {
+          include: {
+            customer: true,
+          },
         },
       },
-    },
-  });
+    });
 
   // Fetch service history for today to check status
   const todayStart = startOfDay(now);
@@ -204,10 +204,12 @@ const handleGET = async (req: MobileAuthRequest, res: NextApiResponse) => {
     };
   });
 
-  res.status(200).json({
+  const responseData = {
     success: true,
     data: assignments,
-  });
+  };
+
+  res.status(200).json(responseData);
 };
 
 export default withMobileAuth(handler);

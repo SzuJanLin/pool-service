@@ -32,29 +32,29 @@ export interface ServiceHistoryWithRelations {
     name: string;
     email: string;
   } | null;
-  readings?: {
+  readings: {
     id: string;
-    freeChlorine?: number | null;
-    totalChlorine?: number | null;
-    pH?: number | null;
-    totalAlkalinity?: number | null;
-    calciumHardness?: number | null;
-    cyanuricAcid?: number | null;
-    salt?: number | null;
-    temperatureC?: number | null;
-    method?: string | null;
-    notes?: string | null;
+    readingDefinitionId: string;
+    value: string;
     measuredAt: string;
-  } | null;
-  doses: {
+    readingDefinition: {
+      id: string;
+      name: string;
+      unit?: string | null;
+    };
+  }[];
+  dosages: {
     id: string;
-    chemical: string;
-    amount: number;
-    unit: string;
+    dosageDefinitionId: string;
+    value: string;
     productName?: string | null;
-    costCents?: number | null;
     notes?: string | null;
     createdAt: string;
+    dosageDefinition: {
+      id: string;
+      name: string;
+      unit?: string | null;
+    };
   }[];
 }
 
@@ -208,7 +208,7 @@ export const useServiceHistoryMutations = (companySlug: string, customerId: stri
     return result.data;
   };
 
-  const addChemicalDose = async (historyId: string, dose: any) => {
+  const addDosage = async (historyId: string, dose: { dosageDefinitionId: string; value: string; productName?: string; notes?: string }) => {
     const response = await fetch(`/api/companies/${companySlug}/customers/${customerId}/service-history/${historyId}/doses`, {
       method: 'POST',
       headers: {
@@ -219,20 +219,20 @@ export const useServiceHistoryMutations = (companySlug: string, customerId: stri
 
     const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.error?.message || 'Failed to add chemical dose');
+      throw new Error(result.error?.message || 'Failed to add dosage');
     }
 
     return result.data;
   };
 
-  const deleteChemicalDose = async (historyId: string, doseId: string) => {
-    const response = await fetch(`/api/companies/${companySlug}/customers/${customerId}/service-history/${historyId}/doses?doseId=${doseId}`, {
+  const deleteDosage = async (historyId: string, doseId: string) => {
+    const response = await fetch(`/api/companies/${companySlug}/customers/${customerId}/service-history/${historyId}/doses/${doseId}`, {
       method: 'DELETE',
     });
 
     const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.error?.message || 'Failed to delete chemical dose');
+      throw new Error(result.error?.message || 'Failed to delete dosage');
     }
 
     return result.data;
@@ -243,8 +243,8 @@ export const useServiceHistoryMutations = (companySlug: string, customerId: stri
     updateServiceHistory,
     deleteServiceHistory,
     updateReadings,
-    addChemicalDose,
-    deleteChemicalDose,
+    addDosage,
+    deleteDosage,
     isCreating,
     isUpdating,
     isDeleting,

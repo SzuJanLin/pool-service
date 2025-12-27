@@ -1,5 +1,3 @@
-import { env } from './env';
-
 interface Coordinates {
   lat: number;
   lng: number;
@@ -7,8 +5,6 @@ interface Coordinates {
 
 export async function geocodeAddress(address: string): Promise<Coordinates | null> {
   try {
-    // Try to use Google Maps if key is available
-    // if (env.GOOGLE_MAPS_API_KEY) { ... }
 
     // Fallback to OpenStreetMap (Nominatim)
     // Note: Nominatim has usage limits (1 request/sec). 
@@ -42,7 +38,4 @@ export async function geocodeAddress(address: string): Promise<Coordinates | nul
     return null;
   }
 }
-
-
-
 

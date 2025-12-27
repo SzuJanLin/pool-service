@@ -62,49 +62,49 @@ model User {
   invalid_login_attempts Int       @default(0)
   lockedAt               DateTime?
 
-  companyMembers CompanyMember[]
-  accounts    Account[]
-  sessions    Session[]
-  invitations Invitation[]
-  routes      Route[]
-  serviceHistory ServiceHistory[] @relation("ServiceTechnician")
-  uploadedPhotos ServicePhoto[]
+  companyMembers  CompanyMember[]
+  accounts        Account[]
+  sessions        Session[]
+  invitations     Invitation[]
+  routes          Route[]
+  serviceHistory  ServiceHistory[] @relation("ServiceTechnician")
+  uploadedPhotos  ServicePhoto[]
   createdServices ServiceHistory[] @relation("ServiceCreatedBy")
   updatedServices ServiceHistory[] @relation("ServiceUpdatedBy")
 }
 
 model Company {
-  id              String       @id @default(uuid())
-  name            String
-  slug            String       @unique
-  domain          String?      @unique
-  defaultRole     Role         @default(TECH)
-  billingId       String?
-  billingProvider String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @default(now())
-  members         CompanyMember[]
-  invitations     Invitation[]
-  apiKeys         ApiKey[]
-  customers       Customer[]
+  id                 String              @id @default(uuid())
+  name               String
+  slug               String              @unique
+  domain             String?             @unique
+  defaultRole        Role                @default(TECH)
+  billingId          String?
+  billingProvider    String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  members            CompanyMember[]
+  invitations        Invitation[]
+  apiKeys            ApiKey[]
+  customers          Customer[]
   checklistTemplates ChecklistTemplate[]
-  serviceHistory  ServiceHistory[]
+  serviceHistory     ServiceHistory[]
   readingDefinitions ReadingDefinition[]
   dosageDefinitions  DosageDefinition[]
-  
+
   @@index([billingId])
 }
 
 model CompanyMember {
   id        String   @id @default(uuid())
-  companyId    String
+  companyId String
   userId    String
   role      Role     @default(TECH)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, userId])
   @@index([userId])
@@ -112,7 +112,7 @@ model CompanyMember {
 
 model Invitation {
   id             String   @id @default(uuid())
-  companyId         String
+  companyId      String
   email          String?
   role           Role     @default(TECH)
   token          String   @unique
@@ -123,7 +123,7 @@ model Invitation {
   sentViaEmail   Boolean  @default(true)
   allowedDomains String[] @default([])
 
-  user User @relation(fields: [invitedBy], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [invitedBy], references: [id], onDelete: Cascade)
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, email])
@@ -142,7 +142,7 @@ model PasswordReset {
 model ApiKey {
   id         String    @id @default(uuid())
   name       String
-  companyId     String
+  companyId  String
   hashedKey  String    @unique
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @default(now())
@@ -193,7 +193,6 @@ model Price {
   service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 }
 
-
 enum CustomerStatus {
   LEAD
   ACTIVE
@@ -209,24 +208,25 @@ enum ChemicalType {
 }
 
 model Customer {
-  id         String   @id @default(uuid())
+  id            String         @id @default(uuid())
   companyId     String
-  firstName  String
-  lastName   String
-  email      String?
-  phone      String?
+  firstName     String
+  lastName      String
+  email         String?
+  phone         String?
   addressStreet String?
   addressCity   String?
   addressState  String?
   addressZip    String?
   lat           Float?
   lng           Float?
-  notes      String?
-  status     CustomerStatus @default(LEAD)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  pools   Pool[]
+  notes         String?
+  status        CustomerStatus @default(LEAD)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now())
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pools         Pool[]
+
   @@index([companyId])
 }
 
@@ -240,10 +240,10 @@ model Pool {
   notes            String?
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @default(now())
-  
+
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   routes   Route[]
-  
+
   @@index([customerId])
 }
 
@@ -265,25 +265,25 @@ enum Frequency {
 }
 
 model Route {
-  id               String      @id @default(uuid())
-  poolId           String
-  techId           String?
-  dayOfWeek        DayOfWeek
-  frequency        Frequency
-  startOn          DateTime
-  stopAfter        DateTime?
-  skipWeeks        Int         @default(0)
-  anchorDate       DateTime?
-  weekOffset       Int         @default(0)
-  skipWeekNumbers  Int[]       @default([])
-  active           Boolean     @default(true)
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @default(now())
-  
-  pool Pool @relation(fields: [poolId], references: [id], onDelete: Cascade)
-  tech User? @relation(fields: [techId], references: [id], onDelete: SetNull)
+  id              String    @id @default(uuid())
+  poolId          String
+  techId          String?
+  dayOfWeek       DayOfWeek
+  frequency       Frequency
+  startOn         DateTime
+  stopAfter       DateTime?
+  skipWeeks       Int       @default(0)
+  anchorDate      DateTime?
+  weekOffset      Int       @default(0)
+  skipWeekNumbers Int[]     @default([])
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
+
+  pool           Pool             @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  tech           User?            @relation(fields: [techId], references: [id], onDelete: SetNull)
   serviceHistory ServiceHistory[]
-  
+
   @@index([poolId])
   @@index([techId])
   @@index([active])
@@ -312,90 +312,93 @@ enum StorageProvider {
   GCS
 }
 
-
 model ServiceHistory {
-  id                   String   @id @default(uuid())
-  routeId              String
-  serviceDate          DateTime
-  status               ServiceStatus
-  technicianId         String?
-  companyId            String?
+  id                  String        @id @default(uuid())
+  routeId             String
+  serviceDate         DateTime
+  status              ServiceStatus
+  technicianId        String?
+  companyId           String?
   checklistTemplateId String?
-  createdById          String?
-  updatedById          String?
-  notes                String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @default(now())
+  createdById         String?
+  updatedById         String?
+  notes               String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @default(now())
 
   // relations
-  route         Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
-  technician    User?    @relation("ServiceTechnician", fields: [technicianId], references: [id], onDelete: SetNull)
-  company       Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  route             Route              @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  technician        User?              @relation("ServiceTechnician", fields: [technicianId], references: [id], onDelete: SetNull)
+  company           Company?           @relation(fields: [companyId], references: [id], onDelete: SetNull)
   checklistTemplate ChecklistTemplate? @relation(fields: [checklistTemplateId], references: [id], onDelete: SetNull)
-  createdBy     User?    @relation("ServiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedBy     User?    @relation("ServiceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdBy         User?              @relation("ServiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy         User?              @relation("ServiceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
   // per-visit checklist items
-  checklist     ServiceChecklistItem[]
+  checklist ServiceChecklistItem[]
   // per-visit photos
-  photos        ServicePhoto[]
+  photos    ServicePhoto[]
+  // per-visit readings
+  readings  ServiceReading[]
+  // per-visit dosages
+  dosages   ServiceDosage[]
 
+  @@unique([routeId, serviceDate]) // optional but useful to prevent dup visits per route/day
   @@index([routeId])
   @@index([serviceDate])
   @@index([technicianId])
   @@index([companyId])
   @@index([checklistTemplateId])
-  @@unique([routeId, serviceDate]) // optional but useful to prevent dup visits per route/day
 }
 
 model ChecklistTemplate {
-  id         String   @id @default(uuid())
-  companyId  String
-  name       String
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
-  items      ChecklistItemTemplate[]
+  items          ChecklistItemTemplate[]
   serviceHistory ServiceHistory[]
 
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([companyId])
 }
 
 model ChecklistItemTemplate {
-  id                   String   @id @default(uuid())
-  checklistTemplateId  String
-  label                String
+  id                  String  @id @default(uuid())
+  checklistTemplateId String
+  label               String
   // type can be extended ("BOOLEAN","NUMBER","TEXT","SELECT")
-  type                 String   @default("BOOLEAN")
-  orderIndex           Int      @default(0)
-  required             Boolean  @default(false)
+  type                String  @default("BOOLEAN")
+  orderIndex          Int     @default(0)
+  required            Boolean @default(false)
 
-  template             ChecklistTemplate @relation(fields: [checklistTemplateId], references: [id], onDelete: Cascade)
+  template             ChecklistTemplate      @relation(fields: [checklistTemplateId], references: [id], onDelete: Cascade)
+  ServiceChecklistItem ServiceChecklistItem[]
 
   @@index([checklistTemplateId])
-  ServiceChecklistItem ServiceChecklistItem[]
 }
 
 model ServiceChecklistItem {
-  id                 String   @id @default(uuid())
-  serviceHistoryId   String
+  id               String   @id @default(uuid())
+  serviceHistoryId String
   // If created from a template:
-  itemTemplateId     String?
-  label              String   // denormalize for audit/history (keeps label even if template changes)
-  type               String   @default("BOOLEAN")
-  orderIndex         Int      @default(0) // preserve order from template
+  itemTemplateId   String?
+  label            String // denormalize for audit/history (keeps label even if template changes)
+  type             String   @default("BOOLEAN")
+  orderIndex       Int      @default(0) // preserve order from template
   // values: for BOOLEAN use completed; for NUMBER/TEXT store here
-  completed          Boolean?
-  numericValue       Decimal? @db.Decimal(10,3)
-  textValue          String?
-  notedIssue         String?  // quick note if failed/observed problem
-  createdAt          DateTime @default(now())
+  completed        Boolean?
+  numericValue     Decimal? @db.Decimal(10, 3)
+  textValue        String?
+  notedIssue       String? // quick note if failed/observed problem
+  createdAt        DateTime @default(now())
 
-  serviceHistory     ServiceHistory        @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
-  templateItem       ChecklistItemTemplate? @relation(fields: [itemTemplateId], references: [id], onDelete: Restrict) // Restrict to prevent orphaned items from deleted templates  (Restrict is safer than SetNull)        
+  serviceHistory ServiceHistory         @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+  templateItem   ChecklistItemTemplate? @relation(fields: [itemTemplateId], references: [id], onDelete: Restrict) // Restrict to prevent orphaned items from deleted templates  (Restrict is safer than SetNull)        
 
   @@index([serviceHistoryId])
   @@index([itemTemplateId])
@@ -408,25 +411,24 @@ model ServicePhoto {
   // storage
   provider         StorageProvider @default(S3)
   bucket           String
-  objectKey        String          // e.g. "companies/{companyId}/services/{serviceHistoryId}/{uuid}.jpg"
-  publicUrl        String?         // optional (you may prefer presigned URLs only)
-  etag             String?         // helps with cache/integrity
-  fileSize         Int?            // bytes
+  objectKey        String // e.g. "companies/{companyId}/services/{serviceHistoryId}/{uuid}.jpg"
+  publicUrl        String? // optional (you may prefer presigned URLs only)
+  etag             String? // helps with cache/integrity
+  fileSize         Int? // bytes
   width            Int?
   height           Int?
   contentType      String?
   uploadedById     String?
-  takenAt          DateTime?       // if you capture EXIF
+  takenAt          DateTime? // if you capture EXIF
   createdAt        DateTime        @default(now())
 
-  serviceHistory   ServiceHistory  @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
-  uploadedBy       User?           @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  serviceHistory ServiceHistory @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+  uploadedBy     User?          @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
 
   @@index([serviceHistoryId])
   @@index([uploadedById])
   @@index([bucket, objectKey], map: "photo_object_idx")
 }
-
 
 model jackson_store {
   key        String    @id(map: "_jackson_store_key") @db.VarChar(1500)
@@ -464,43 +466,79 @@ model jackson_ttl {
 }
 
 model ReadingDefinition {
-  id        String   @id @default(uuid())
-  companyId String
-  name      String
-  unit      String?
+  id           String   @id @default(uuid())
+  companyId    String
+  name         String
+  unit         String?
   // Stores comma-separated list of allowed values e.g. "1,2,3,4,5" or JSON array
-  values    String[] @default([]) 
+  values       String[] @default([])
   defaultValue String?
-  
-  orderIndex Int     @default(0)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  orderIndex Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  serviceReadings ServiceReading[]
 
   @@index([companyId])
 }
 
 model DosageDefinition {
-  id        String   @id @default(uuid())
-  companyId String
-  name      String
-  unit      String?
-  dosageType String?
-  cost      Decimal? @db.Decimal(10,2)
+  id           String   @id @default(uuid())
+  companyId    String
+  name         String
+  unit         String?
+  dosageType   String?
+  cost         Decimal? @db.Decimal(10, 2)
   // Stores comma-separated list of allowed values e.g. "0.5, 1, 1.5"
-  values    String[] @default([])
+  values       String[] @default([])
   defaultValue String?
 
-  orderIndex Int     @default(0)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  orderIndex Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  serviceDosages ServiceDosage[]
 
   @@index([companyId])
+}
+
+model ServiceReading {
+  id                  String   @id @default(uuid())
+  serviceHistoryId    String
+  readingDefinitionId String
+  value               String // Store as string to preserve exact format
+  measuredAt          DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  serviceHistory    ServiceHistory    @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+  readingDefinition ReadingDefinition @relation(fields: [readingDefinitionId], references: [id], onDelete: Restrict)
+
+  @@unique([serviceHistoryId, readingDefinitionId])
+  @@index([serviceHistoryId])
+  @@index([readingDefinitionId])
+}
+
+model ServiceDosage {
+  id                 String   @id @default(uuid())
+  serviceHistoryId   String
+  dosageDefinitionId String
+  value              String // Store as string to preserve exact format
+  productName        String?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  serviceHistory   ServiceHistory   @relation(fields: [serviceHistoryId], references: [id], onDelete: Cascade)
+  dosageDefinition DosageDefinition @relation(fields: [dosageDefinitionId], references: [id], onDelete: Restrict)
+
+  @@index([serviceHistoryId])
+  @@index([dosageDefinitionId])
 }

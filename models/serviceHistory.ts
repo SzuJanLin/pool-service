@@ -2,11 +2,13 @@ import { prisma } from '@/lib/prisma';
 import { 
   ServiceHistory, 
   Prisma,
-  ServiceReadings,
-  ChemicalDose,
+  ServiceReading,
+  ServiceDosage,
   Route,
   User,
-  Company
+  Company,
+  ReadingDefinition,
+  DosageDefinition
 } from '@prisma/client';
 
 export type ServiceHistoryWithRelations = ServiceHistory & {
@@ -23,8 +25,8 @@ export type ServiceHistoryWithRelations = ServiceHistory & {
   };
   technician?: User | null;
   company?: Company | null;
-  readings?: ServiceReadings | null;
-  doses: ChemicalDose[];
+  readings: (ServiceReading & { readingDefinition: ReadingDefinition })[];
+  dosages: (ServiceDosage & { dosageDefinition: DosageDefinition })[];
 };
 
 export const createServiceHistory = async (
@@ -62,8 +64,15 @@ export const getServiceHistory = async (
       },
       technician: true,
       company: true,
-      readings: true,
-      doses: {
+      readings: {
+        include: {
+          readingDefinition: true
+        }
+      },
+      dosages: {
+        include: {
+          dosageDefinition: true
+        },
         orderBy: {
           createdAt: 'desc',
         },
@@ -150,8 +159,15 @@ export const getServiceHistories = async (
             name: true,
           },
         },
-        readings: true,
-        doses: {
+        readings: {
+          include: {
+            readingDefinition: true
+          }
+        },
+        dosages: {
+          include: {
+            dosageDefinition: true
+          },
           orderBy: {
             createdAt: 'desc',
           },
