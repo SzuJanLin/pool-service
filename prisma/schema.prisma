@@ -370,9 +370,9 @@ model ChecklistTemplate {
 model ChecklistItemTemplate {
   id                  String  @id @default(uuid())
   checklistTemplateId String
-  label               String
-  // type can be extended ("BOOLEAN","NUMBER","TEXT","SELECT")
-  type                String  @default("BOOLEAN")
+  description         String
+  // descriptionWhenCompleted is optional text to show after checking
+  descriptionWhenCompleted String?
   orderIndex          Int     @default(0)
   required            Boolean @default(false)
 
@@ -387,13 +387,12 @@ model ServiceChecklistItem {
   serviceHistoryId String
   // If created from a template:
   itemTemplateId   String?
-  label            String // denormalize for audit/history (keeps label even if template changes)
-  type             String   @default("BOOLEAN")
+  description      String // denormalize for audit/history
+  // descriptionWhenCompleted is optional text to show after checking (snapshot)
+  descriptionWhenCompleted String?
   orderIndex       Int      @default(0) // preserve order from template
   // values: for BOOLEAN use completed; for NUMBER/TEXT store here
   completed        Boolean?
-  numericValue     Decimal? @db.Decimal(10, 3)
-  textValue        String?
   notedIssue       String? // quick note if failed/observed problem
   createdAt        DateTime @default(now())
 

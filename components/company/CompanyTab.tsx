@@ -6,6 +6,7 @@ import {
   ShieldExclamationIcon,
   UserPlusIcon,
   BanknotesIcon,
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import type { Company } from '@prisma/client';
 import classNames from 'classnames';
@@ -45,6 +46,15 @@ const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTab
       href: `/companies/${company.slug}/members`,
       active: activeTab === 'members',
       icon: UserPlusIcon,
+    });
+  }
+
+  if (canAccess('company', ['update', 'read'])) {
+    navigations.push({
+      name: 'Checklist',
+      href: `/companies/${company.slug}/checklist`,
+      active: activeTab === 'checklist',
+      icon: ClipboardDocumentCheckIcon,
     });
   }
   
