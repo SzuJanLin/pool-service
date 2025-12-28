@@ -106,8 +106,8 @@ const handleGET = async (req: MobileAuthRequest, res: NextApiResponse, history: 
                         data: {
                             serviceHistoryId: history.id,
                             itemTemplateId: tmplItem.id,
-                            label: tmplItem.label,
-                            type: tmplItem.type,
+                            description: tmplItem.description,
+                            descriptionWhenCompleted: tmplItem.descriptionWhenCompleted,
                             orderIndex: tmplItem.orderIndex,
                             completed: false,
                         }
@@ -124,7 +124,7 @@ const handleGET = async (req: MobileAuthRequest, res: NextApiResponse, history: 
 
 const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse, history: any) => {
     // Update an item
-    const { itemId, completed, notedIssue, textValue, numericValue } = req.body;
+    const { itemId, completed, notedIssue } = req.body;
 
     if (!itemId) {
         return res.status(400).json({ error: { message: 'Missing itemId' } });
@@ -144,8 +144,6 @@ const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse, history:
         data: {
             completed: completed !== undefined ? completed : item.completed,
             notedIssue: notedIssue !== undefined ? notedIssue : item.notedIssue,
-            textValue: textValue !== undefined ? textValue : item.textValue,
-            numericValue: numericValue !== undefined ? numericValue : item.numericValue,
         }
     });
 
@@ -153,4 +151,3 @@ const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse, history:
 };
 
 export default withMobileAuth(handler);
-
