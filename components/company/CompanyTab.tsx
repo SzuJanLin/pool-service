@@ -33,6 +33,15 @@ const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTab
 
   if (canAccess('company', ['update', 'read'])) {
     navigations.push({
+      name: 'Checklist',
+      href: `/companies/${company.slug}/checklist`,
+      active: activeTab === 'checklist',
+      icon: ClipboardDocumentCheckIcon,
+    });
+  }
+
+  if (canAccess('company', ['update', 'read'])) {
+    navigations.push({
       name: 'Readings & Dosages',
       href: `/companies/${company.slug}/readings-dosages`,
       active: activeTab === 'readings-dosages',
@@ -49,14 +58,7 @@ const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTab
     });
   }
 
-  if (canAccess('company', ['update', 'read'])) {
-    navigations.push({
-      name: 'Checklist',
-      href: `/companies/${company.slug}/checklist`,
-      active: activeTab === 'checklist',
-      icon: ClipboardDocumentCheckIcon,
-    });
-  }
+  
   
   if (canAccess('company', ['update', 'read'])) {
     navigations.push(    {
