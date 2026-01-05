@@ -49,6 +49,15 @@ const CompanyTab = ({ activeTab, company, heading, companyFeatures }: CompanyTab
     });
   }
 
+  if (canAccess('company', ['update', 'read'])) {
+    navigations.push({
+      name: 'Service Emails',
+      href: `/companies/${company.slug}/service-emails`,
+      active: activeTab === 'service-emails',
+      icon: PaperAirplaneIcon,
+    });
+  }
+
   if (canAccess('company_member', ['create', 'update', 'read', 'delete'])) {
     navigations.push({
       name: 'Members',

@@ -1,7 +1,5 @@
 import { Error, Loading } from '@/components/shared';
-import { AccessControl } from '@/components/shared/AccessControl';
-import { CompanyTab } from '@/components/company';
-import ChecklistManager from '@/components/company/ChecklistManager';
+import { CompanyTab, ServiceEmailSettings } from '@/components/company';
 import env from '@/lib/env';
 import useCompany from 'hooks/useCompany';
 import type { GetServerSidePropsContext } from 'next';
@@ -9,7 +7,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import type { CompanyFeature } from 'types';
 
-const ChecklistPage = ({ companyFeatures }: { companyFeatures: CompanyFeature }) => {
+const ServiceEmailsPage = ({ companyFeatures }: { companyFeatures: CompanyFeature }) => {
   const { t } = useTranslation('common');
   const { isLoading, isError, company } = useCompany();
 
@@ -27,10 +25,10 @@ const ChecklistPage = ({ companyFeatures }: { companyFeatures: CompanyFeature })
 
   return (
     <>
-      <CompanyTab activeTab="checklist" company={company} companyFeatures={companyFeatures} />
-      <AccessControl resource="company" actions={['update']}>
-        <ChecklistManager company={company} />
-      </AccessControl>
+      <CompanyTab activeTab="service-emails" company={company} companyFeatures={companyFeatures} />
+      <div className="max-w-4xl mx-auto">
+        <ServiceEmailSettings company={company} />
+      </div>
     </>
   );
 };
@@ -46,6 +44,6 @@ export async function getServerSideProps({
   };
 }
 
-export default ChecklistPage;
+export default ServiceEmailsPage;
 
 

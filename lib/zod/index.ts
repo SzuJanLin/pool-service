@@ -4,3 +4,4 @@ export * from './route';
 export * from './serviceHistory';
 export * from './mobile-auth';
 export * from './primitives';
+export * from './serviceEmailSettings';

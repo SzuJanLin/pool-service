@@ -91,6 +91,7 @@ model Company {
   serviceHistory     ServiceHistory[]
   readingDefinitions ReadingDefinition[]
   dosageDefinitions  DosageDefinition[]
+  serviceEmailSettings ServiceEmailSettings?
 
   @@index([billingId])
 }
@@ -540,4 +541,41 @@ model ServiceDosage {
 
   @@index([serviceHistoryId])
   @@index([dosageDefinitionId])
+}
+
+model ServiceEmailSettings {
+  id        String   @id @default(uuid())
+  companyId String   @unique
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Contact Information
+  fromName    String?
+  fromEmail   String?
+  bcc         String?
+  companyName String?
+  address     String?
+  city        String?
+  state       String?
+  zip         String?
+  phone       String?
+  email       String?
+  website     String?
+  logoUrl     String?
+
+  // Configuration
+  enabled Boolean @default(false)
+  subject String?
+  header  String?
+  message String? @db.Text
+  footer  String?
+
+  // Toggles
+  includeReadings  Boolean @default(true)
+  includeDosages   Boolean @default(true)
+  includeChecklist Boolean @default(true)
+  includeTechName  Boolean @default(false)
+  requirePhoto     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

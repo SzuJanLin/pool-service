@@ -60,3 +60,4 @@ const handleGET = async (req: MobileAuthRequest, res: NextApiResponse, companyId
 export default withMobileAuth(handler);
 
 
+
