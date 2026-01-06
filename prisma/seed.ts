@@ -196,8 +196,9 @@ async function seedCustomers(companies: any[]) {
   const city = faker.location.city();
   const state = faker.location.state({ abbreviated: true });
   // Base coordinates for the city (all customers will be near this location)
-  const baseLat = parseFloat(faker.location.latitude());
-  const baseLng = parseFloat(faker.location.longitude());
+  // Use US bounds to ensure markers appear on land (approx US center)
+  const baseLat = parseFloat(faker.location.latitude({ min: 30, max: 45 }));
+  const baseLng = parseFloat(faker.location.longitude({ min: -120, max: -75 }));
 
   for (let i = 0; i < CUSTOMERS_PER_COMPANY; i++) {
     const firstName = faker.person.firstName();
