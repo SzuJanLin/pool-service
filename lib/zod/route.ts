@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { dayOfWeek, poolId } from './primitives';
+import { poolId } from './primitives';
 
 export const createRouteSchema = z.object({
   poolId: poolId,

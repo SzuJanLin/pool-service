@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { Prisma, DosageDefinition } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export const getDosageDefinitions = async (companyId: string) => {
   return await prisma.dosageDefinition.findMany({

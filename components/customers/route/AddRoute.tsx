@@ -1,5 +1,5 @@
 import { defaultHeaders } from '@/lib/common';
-import type { Company, User } from '@prisma/client';
+import type { Company } from '@prisma/client';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Button } from 'react-daisyui';

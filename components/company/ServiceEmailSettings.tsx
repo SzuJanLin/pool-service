@@ -87,6 +87,7 @@ const ServiceEmailSettings = ({ company }: ServiceEmailSettingsProps) => {
     };
 
     fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [company.slug]);
 
   return (
@@ -189,6 +190,7 @@ const ServiceEmailSettings = ({ company }: ServiceEmailSettingsProps) => {
           <div className="mt-4">
             <h3 className="text-sm font-medium mb-2">{t('company-logo')}</h3>
             {formik.values.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={formik.values.logoUrl}
                 alt="Company Logo"

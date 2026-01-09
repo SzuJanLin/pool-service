@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '@/lib/session';
-import { uploadCustomerPhotoBuffer, deleteFromR2 } from '@/lib/s3';
+import { uploadCustomerPhotoBuffer } from '@/lib/s3';
 import { getCompany } from 'models/company';
 import { getCustomer } from 'models/customer';
 import { prisma } from '@/lib/prisma';
 import formidable from 'formidable';
 import fs from 'fs';
-import env from '@/lib/env';
 
 // Disable the default body parser for this API route
 export const config = {

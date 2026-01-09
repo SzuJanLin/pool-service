@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 import { withMobileAuth, MobileAuthRequest } from '@/lib/middleware/mobile-auth';
 import { validateWithSchema, mobileLogoutSchema } from '@/lib/zod/mobile-auth';
 import { recordMetric } from '@/lib/metrics';
@@ -27,7 +27,7 @@ const handler = async (req: MobileAuthRequest, res: NextApiResponse) => {
 
 const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse) => {
   // Validate request body
-  const { deviceInfo } = validateWithSchema(
+  validateWithSchema(
     mobileLogoutSchema,
     req.body
   );

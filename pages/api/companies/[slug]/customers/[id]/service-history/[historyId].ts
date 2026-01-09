@@ -110,7 +110,7 @@ const handlePATCH = async (req: NextApiRequest, res: NextApiResponse) => {
   // Validate request body
   const updateData = validateWithSchema(updateServiceHistorySchema, req.body);
 
-  const updatedHistory = await updateServiceHistory(
+  await updateServiceHistory(
     historyId,
     companyMember.company.id,
     {

@@ -1,6 +1,6 @@
 import { Card, InputWithLabel } from '@/components/shared';
 import { defaultHeaders } from '@/lib/common';
-import { Company, CompanyMember } from '@prisma/client';
+import { Company } from '@prisma/client';
 import { useFormik } from 'formik';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';

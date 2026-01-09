@@ -17,6 +17,7 @@ export interface MobileAuthRequest extends NextApiRequest {
  */
 export const authenticateMobileToken = async (
   req: MobileAuthRequest,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   res: NextApiResponse
 ): Promise<boolean> => {
   try {

@@ -2,8 +2,6 @@ import { prisma } from '@/lib/prisma';
 import { sendEmail } from './sendEmail';
 import { render } from '@react-email/components';
 import ServiceEmail, { EmailServiceData } from '@/components/emailTemplates/ServiceEmail';
-import { ServiceEmailSettings, Company } from '@prisma/client';
-import env from '@/lib/env';
 
 export const sendServiceEmail = async (serviceHistoryId: string, companyId: string) => {
   try {

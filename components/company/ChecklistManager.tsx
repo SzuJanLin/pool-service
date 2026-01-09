@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { useTranslation } from 'next-i18next';
 import toast from 'react-hot-toast';

@@ -1,5 +1,4 @@
 import React from 'react';
-import CompanyDropdown from '../CompanyDropdown';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Brand from './Brand';
 import Navigation from './Navigation';

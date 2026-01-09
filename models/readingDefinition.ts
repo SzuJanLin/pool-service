@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { Prisma, ReadingDefinition } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export const getReadingDefinitions = async (companyId: string) => {
   return await prisma.readingDefinition.findMany({

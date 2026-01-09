@@ -1,6 +1,4 @@
 import {
-  Body,
-  Container,
   Head,
   Heading,
   Html,
@@ -56,6 +54,7 @@ export const ServiceEmail = ({
   company,
   serviceData,
 }: ServiceEmailProps) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const companyLogo = settings.logoUrl || company.logoUrl; // Fallback to company logo if settings logo not set? Or just settings.
   // The schema says settings.logoUrl. Let's assume settings.logoUrl is the one to use for email.
 

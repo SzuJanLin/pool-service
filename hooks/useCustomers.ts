@@ -1,7 +1,6 @@
 import fetcher from '@/lib/fetcher';
 import type { Customer } from '@prisma/client';
 import useSWR, { mutate } from 'swr';
-import type { ApiResponse } from 'types';
 
 interface PaginationInfo {
   page: number;
