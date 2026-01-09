@@ -17,6 +17,7 @@ interface EmailData {
   subject: string;
   html: string;
   text?: string;
+  bcc?: string | string[];
 }
 
 export const sendEmail = async (data: EmailData) => {

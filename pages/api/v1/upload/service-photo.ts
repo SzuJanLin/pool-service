@@ -125,7 +125,8 @@ const handler = async (req: MobileAuthRequest, res: NextApiResponse) => {
     // Generate the key for the upload
     // Structure: company/{companyId}/customers/{customerId}/services/{serviceHistoryId}/{timestamp}-{random}.{ext}
     const key = `company/${companyMember.companyId}/customers/${customerId}/services/${serviceHistoryId}/${timestamp}-${randomString}.${extension}`;
-    const bucket = env.r2.bucket;
+    // Use public bucket if available, otherwise fallback to default bucket
+    const bucket = env.r2.publicBucket || env.r2.bucket;
     
     if (!bucket) {
         throw new Error('R2 bucket not configured');
@@ -149,7 +150,7 @@ const handler = async (req: MobileAuthRequest, res: NextApiResponse) => {
         fileSize: file.size,
         contentType: contentType,
         uploadedById: user.id,
-        publicUrl: publicUrlBase ? directUrl : undefined, 
+        publicUrl: directUrl, 
       },
     });
 

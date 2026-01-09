@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 import { useTranslation } from 'next-i18next';
-import { Button, Input } from 'react-daisyui';
+import { Button } from 'react-daisyui';
 import toast from 'react-hot-toast';
 import { z } from 'zod';
 import { Card, InputWithLabel } from '@/components/shared';
@@ -345,7 +345,13 @@ const ServiceEmailSettings = ({ company }: ServiceEmailSettingsProps) => {
             <div className="pt-4 border-t border-gray-200">
               <h3 className="font-medium mb-4">{t('try-it-out')}</h3>
               <div className="flex justify-end">
-                <Button type="button" size="sm" variant="outline" color="primary">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  color="primary"
+                  onClick={() => window.open(`/companies/${company.slug}/service-emails/preview`, '_blank')}
+                >
                   {t('email-preview')}
                 </Button>
               </div>

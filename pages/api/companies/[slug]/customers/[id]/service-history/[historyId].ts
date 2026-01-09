@@ -77,6 +77,8 @@ const handleGET = async (req: NextApiRequest, res: NextApiResponse) => {
   res.status(200).json({ data: serviceHistory });
 };
 
+import { sendServiceEmail } from '@/lib/email/sendServiceEmail';
+
 // Update a service history entry
 const handlePATCH = async (req: NextApiRequest, res: NextApiResponse) => {
   const companyMember = await throwIfNoCompanyAccess(req, res);
@@ -116,6 +118,14 @@ const handlePATCH = async (req: NextApiRequest, res: NextApiResponse) => {
       updatedById: companyMember.userId,
     }
   );
+
+  // Check if status changed to COMPLETED and trigger email
+  if (updateData.status === 'COMPLETED' && existingHistory.status !== 'COMPLETED') {
+    // Fire and forget email sending
+    sendServiceEmail(historyId, companyMember.company.id).catch(err => 
+      console.error('Error sending service email:', err)
+    );
+  }
 
   // Fetch the complete updated service history
   const completeHistory = await getServiceHistory(historyId, companyMember.company.id);

@@ -77,6 +77,7 @@ const AddRoute = ({ company, customer, technicians, route, onSuccess, onCancel }
         
         // Format the data
         const body = JSON.stringify({
+          routeId: isEdit ? route.id : undefined,
           poolId: values.poolId,
           techId: values.techId && values.techId !== '' ? values.techId : null,
           dayOfWeek: values.dayOfWeek,

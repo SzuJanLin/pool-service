@@ -2,6 +2,7 @@ import { NextApiResponse } from 'next';
 import { withMobileAuth, MobileAuthRequest } from '@/lib/middleware/mobile-auth';
 import { prisma } from '@/lib/prisma';
 import { DayOfWeek, ServiceStatus } from '@prisma/client';
+import { sendServiceEmail } from '@/lib/email/sendServiceEmail';
 
 const startOfDay = (date: Date) => {
   const d = new Date(date);
@@ -118,6 +119,13 @@ const handlePOST = async (req: MobileAuthRequest, res: NextApiResponse) => {
         updatedById: user.id,
       },
     });
+  }
+
+  // If status is completed, trigger email sending
+  if (status === 'COMPLETED') {
+    sendServiceEmail(serviceHistory.id, companyId).catch(err => 
+      console.error('Error sending service email from mobile app:', err)
+    );
   }
 
   res.status(200).json({ success: true, data: serviceHistory });

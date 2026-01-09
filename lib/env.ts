@@ -126,6 +126,7 @@ const env = {
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
     bucket: process.env.R2_BUCKET_NAME,
+    publicBucket: process.env.R2_PUBLIC_BUCKET_NAME, // Public bucket for photos
     endpoint: process.env.R2_ENDPOINT_URL, // This will be something like https://your-account-id.r2.cloudflarestorage.com
     publicUrl: process.env.R2_PUBLIC_URL, // Optional: for direct public access
   },
